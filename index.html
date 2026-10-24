@@ -84,6 +84,15 @@ h3{margin:0 0 4px}
 .hint{color:var(--mut);font-size:13px;margin:8px 0 0}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#222;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
 #toast.show{opacity:1}
+.cih{background:var(--pri);color:var(--priT);border-radius:16px;padding:14px 16px;margin-bottom:8px}
+.cih small{display:block;opacity:.85;font-size:13px}
+.cih b{font-size:26px;word-break:break-word}
+.accs{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-bottom:12px}
+.acc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 10px;min-width:0}
+.acc small{display:block;color:var(--mut);font-size:12px}
+.acc b{font-size:14px;word-break:break-word}
+.chips.three{grid-template-columns:repeat(3,1fr)}
+.amt.tr{color:var(--mut)}
 #print{display:none}
 @media print{
   body>*:not(#print){display:none!important}
@@ -133,7 +142,11 @@ const T = {
     badAmount:'Enter a valid amount', delConfirm:'Delete?', saved:'Saved', imported:'entries imported', badFile:'Could not read this file',
     importAsk:'entries found', total:'Total', delProfile:'Delete current profile', profName:'Profile name', accName:'Account name',
     backupHint:'Your data lives only on this phone. Take a backup regularly and keep it in iCloud Drive / Files.',
-    lastProfile:'You need at least one profile', typeExp:'Expense category', typeInc:'Income category'
+    lastProfile:'You need at least one profile', typeExp:'Expense category', typeInc:'Income category',
+    bank:'Bank', cash:'Cash', card:'Credit Card', paidVia:'Paid via', receivedIn:'Received in', transfer:'Transfer / Withdraw cash',
+    transferShort:'Transfer', withdraw:'Cash withdrawal', fromAcc:'From', toAcc:'To', cashInHand:'Total cash in hand',
+    openBal:'Opening balance', sameAcc:'Choose two different accounts',
+    openHint:'Enter what each account holds today. Credit card: use 0 if you owe nothing; spending makes it negative (the amount you owe). Total cash in hand is the sum of all three.'
   },
   bn: {
     app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
@@ -149,7 +162,11 @@ const T = {
     badAmount:'সঠিক পরিমাণ লিখুন', delConfirm:'মুছে ফেলবেন?', saved:'সংরক্ষিত', imported:'টি এন্ট্রি ইমপোর্ট হয়েছে', badFile:'ফাইলটি পড়া যায়নি',
     importAsk:'টি এন্ট্রি পাওয়া গেছে', total:'মোট', delProfile:'বর্তমান প্রোফাইল মুছুন', profName:'প্রোফাইলের নাম', accName:'অ্যাকাউন্টের নাম',
     backupHint:'আপনার ডেটা শুধু এই ফোনেই থাকে। নিয়মিত ব্যাকআপ নিয়ে iCloud Drive / Files-এ রাখুন।',
-    lastProfile:'অন্তত একটা প্রোফাইল থাকতে হবে', typeExp:'খরচের ক্যাটাগরি', typeInc:'আয়ের ক্যাটাগরি'
+    lastProfile:'অন্তত একটা প্রোফাইল থাকতে হবে', typeExp:'খরচের ক্যাটাগরি', typeInc:'আয়ের ক্যাটাগরি',
+    bank:'ব্যাংক', cash:'ক্যাশ', card:'ক্রেডিট কার্ড', paidVia:'যেভাবে পেমেন্ট করেছেন', receivedIn:'যেখানে পেয়েছেন', transfer:'ট্রান্সফার / ক্যাশ উইথড্র',
+    transferShort:'ট্রান্সফার', withdraw:'ক্যাশ উইথড্র', fromAcc:'যেখান থেকে', toAcc:'যেখানে', cashInHand:'মোট ক্যাশ ইন হ্যান্ড',
+    openBal:'শুরুর ব্যালেন্স', sameAcc:'দুটো আলাদা অ্যাকাউন্ট বাছুন',
+    openHint:'প্রতিটি অ্যাকাউন্টে এখন যত টাকা আছে তা লিখুন। ক্রেডিট কার্ডে কিছু বাকি না থাকলে ০ দিন; খরচ করলে ব্যালেন্স মাইনাস হবে (মানে আপনার বাকি)। মোট ক্যাশ ইন হ্যান্ড তিনটার যোগফল।'
   }
 };
 const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
@@ -166,14 +183,32 @@ function defaultCats() {
     .concat(i.map(c => ({id:c[0], name:c[1], bn:c[2], icon:c[3], color:c[4], type:'income'})));
 }
 function newProfileData() {
-  return { accounts: [{id:'cash', name:'Cash'}, {id:'bank', name:'Bank'}, {id:'wallet', name:'Mobile wallet'}], categories: defaultCats(), tx: [] };
+  return { accounts: [{id:'bank', name:'Bank', open:0}, {id:'cash', name:'Cash', open:0}, {id:'card', name:'Credit Card', open:0}], categories: defaultCats(), tx: [] };
 }
 function fresh() {
   const pid = uid();
   return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'en', cur:'৳'} };
 }
+const STD = ['bank', 'cash', 'card'];
+const STD_NAME = {bank:'Bank', cash:'Cash', card:'Credit Card'};
+// Make sure every profile has the three standard accounts, opening balances, and a stable order.
+function migrate(s) {
+  Object.keys(s.data).forEach(pid => {
+    const d = s.data[pid];
+    d.accounts = d.accounts || [];
+    d.tx = d.tx || [];
+    STD.forEach(id => { if (!d.accounts.find(a => a.id === id)) d.accounts.push({id, name:STD_NAME[id], open:0}); });
+    d.accounts.forEach(a => { if (typeof a.open !== 'number') a.open = 0; });
+    // an old extra account (e.g. 'wallet') is kept only if entries still use it
+    d.accounts = d.accounts.filter(a => STD.includes(a.id) || d.tx.some(x => x.acc === a.id || x.from === a.id || x.to === a.id));
+    const ord = id => { const i = STD.indexOf(id); return i < 0 ? 9 : i; };
+    d.accounts.sort((a, b) => ord(a.id) - ord(b.id));
+  });
+  s.settings = s.settings || {theme:'auto', lang:'en', cur:'৳'};
+  return s;
+}
 function load() {
-  try { const r = localStorage.getItem(KEY); if (r) { const s = JSON.parse(r); if (s && s.profiles && s.data) return s; } } catch (e) {}
+  try { const r = localStorage.getItem(KEY); if (r) { const s = JSON.parse(r); if (s && s.profiles && s.data) return migrate(s); } } catch (e) {}
   return fresh();
 }
 let S = load();
@@ -182,7 +217,19 @@ const P = () => S.data[S.cur];
 const profName = () => (S.profiles.find(p => p.id === S.cur) || {name:''}).name;
 const cat = id => P().categories.find(c => c.id === id) || {id, name:t('uncategorized'), icon:'❔', color:'#8a8f8c'};
 const catName = c => (S.settings.lang === 'bn' && c.bn) ? c.bn : c.name;
-const accName = id => (P().accounts.find(a => a.id === id) || {name:'—'}).name;
+const accName = id => STD.includes(id) ? t(id) : (P().accounts.find(a => a.id === id) || {name:'—'}).name;
+const accIcon = id => ({bank:'🏦', cash:'💵', card:'💳'})[id] || '👛';
+const accColor = id => ({bank:'#2e86c1', cash:'#1f9d6b', card:'#c864d8'})[id] || '#8a8f8c';
+function balances() {
+  const b = {};
+  P().accounts.forEach(a => b[a.id] = a.open || 0);
+  P().tx.forEach(x => {
+    if (x.type === 'income') b[x.acc] = (b[x.acc] || 0) + x.amount;
+    else if (x.type === 'expense') b[x.acc] = (b[x.acc] || 0) - x.amount;
+    else if (x.type === 'transfer') { b[x.from] = (b[x.from] || 0) - x.amount; b[x.to] = (b[x.to] || 0) + x.amount; }
+  });
+  return b;
+}
 const money = n => S.settings.cur + ' ' + Number(n).toLocaleString(loc(), {maximumFractionDigits:2});
 
 /* ---------- ui state ---------- */
@@ -214,10 +261,19 @@ const dateLabel = s => parseYmd(s).toLocaleDateString(loc(), {weekday:'short', d
 function inRange() { const [a, b] = range(); return P().tx.filter(x => x.date >= a && x.date <= b); }
 function txs() {
   const q = U.q.trim().toLowerCase();
-  return inRange().filter(x => !q || (x.note || '').toLowerCase().includes(q) || catName(cat(x.cat)).toLowerCase().includes(q) || String(x.amount).includes(q))
-    .sort((m, n) => n.date.localeCompare(m.date) || (n.ts || 0) - (m.ts || 0));
+  return inRange().filter(x => {
+    if (!q) return true;
+    const cn = x.type === 'transfer' ? t('transferShort') + ' ' + t('withdraw') : catName(cat(x.cat));
+    const an = x.type === 'transfer' ? accName(x.from) + ' ' + accName(x.to) : accName(x.acc);
+    return (x.note || '').toLowerCase().includes(q) || cn.toLowerCase().includes(q) || an.toLowerCase().includes(q) || String(x.amount).includes(q);
+  }).sort((m, n) => n.date.localeCompare(m.date) || (n.ts || 0) - (m.ts || 0));
 }
-function sums(list) { let i = 0, e = 0; list.forEach(x => x.type === 'income' ? i += x.amount : e += x.amount); return {i, e, b:i - e}; }
+// transfers move money between accounts; they are neither income nor expense
+function sums(list) {
+  let i = 0, e = 0;
+  list.forEach(x => { if (x.type === 'income') i += x.amount; else if (x.type === 'expense') e += x.amount; });
+  return {i, e, b:i - e};
+}
 
 /* ---------- rendering ---------- */
 function applyTheme() {
@@ -237,25 +293,39 @@ function sumHtml(s) {
 function listHtml(list) {
   if (!list.length) return `<div class="empty">${t('noTx')}</div>`;
   const dayNet = {};
-  list.forEach(x => dayNet[x.date] = (dayNet[x.date] || 0) + (x.type === 'income' ? x.amount : -x.amount));
+  list.forEach(x => dayNet[x.date] = (dayNet[x.date] || 0) + (x.type === 'income' ? x.amount : x.type === 'expense' ? -x.amount : 0));
   let h = '', last = '';
   list.forEach(x => {
     if (x.date !== last) { last = x.date; h += `<div class="dh"><span>${esc(dateLabel(x.date))}</span><span>${money(dayNet[x.date])}</span></div>`; }
+    if (x.type === 'transfer') {
+      h += `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:#7a8b9922;color:#7a8b99">🔄</div>
+      <div class="mid"><b>${t(x.to === 'cash' && x.from !== 'cash' ? 'withdraw' : 'transferShort')}</b><small>${accIcon(x.from)} ${esc(accName(x.from))} → ${accIcon(x.to)} ${esc(accName(x.to))}${x.note ? ' · ' + esc(x.note) : ''}</small></div>
+      <div class="amt tr">${money(x.amount)}</div></div>`;
+      return;
+    }
     const c = cat(x.cat);
     h += `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</div>
-      <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${esc(accName(x.acc))}</small></div>
+      <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${accIcon(x.acc)} ${esc(accName(x.acc))}</small></div>
       <div class="amt ${x.type}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</div></div>`;
   });
   return h;
 }
+function accountsHtml() {
+  const b = balances(), accs = P().accounts;
+  const total = accs.reduce((s, a) => s + (b[a.id] || 0), 0);
+  return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
+  <div class="accs">${accs.map(a => `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}</div>`;
+}
 function renderList() {
   if (!$('#list')) return;
   const list = txs();
+  $('#accs').innerHTML = accountsHtml();
   $('#sum').innerHTML = sumHtml(sums(list));
   $('#list').innerHTML = listHtml(list);
 }
 function homeView() {
   return `<div class="top"><h1>${t('app')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
+  <div id="accs"></div>
   ${periodBar()}<div id="sum"></div>
   <div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>
   <div id="list"></div>`;
@@ -287,7 +357,6 @@ function reportsView() {
 }
 function settingsView() {
   const p = P();
-  const net = {}; p.tx.forEach(x => net[x.acc] = (net[x.acc] || 0) + (x.type === 'income' ? x.amount : -x.amount));
   const catList = type => p.categories.filter(c => c.type === type).map(c => `<div class="li"><span class="dot" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span class="n">${esc(catName(c))}</span><button class="x" data-act="catdel" data-id="${c.id}">✕</button></div>`).join('');
   const standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
   return `<div class="top"><h1>${t('settings')}</h1></div>
@@ -295,8 +364,8 @@ function settingsView() {
     ${S.profiles.map(pr => `<div class="li"><span class="n">${esc(pr.name)}${pr.id === S.cur ? ' ✓' : ''}</span>${pr.id === S.cur ? '' : `<button class="lnk" style="width:auto" data-act="pswitch" data-id="${pr.id}">${t('switchTo')}</button>`}</div>`).join('')}
     <button class="lnk" data-act="pnew">＋ ${t('newProfile')}</button><button class="lnk" data-act="prename">✎ ${t('rename')}</button><button class="lnk" style="color:var(--exp)" data-act="pdel">🗑 ${t('delProfile')}</button></div>
   <div class="sec"><h3>${t('accounts')}</h3>
-    ${p.accounts.map(a => `<div class="li"><span class="n">${esc(a.name)}</span><small>${money(net[a.id] || 0)}</small><button class="x" data-act="accdel" data-id="${a.id}">✕</button></div>`).join('')}
-    <button class="lnk" data-act="accadd">＋ ${t('addAccount')}</button></div>
+    ${p.accounts.map(a => `<label>${accIcon(a.id)} ${esc(accName(a.id))} · ${t('openBal')}<input inputmode="decimal" data-open="${a.id}" value="${a.open || 0}"></label>`).join('')}
+    <p class="hint">${t('openHint')}</p></div>
   <div class="sec"><h3>${t('typeExp')}</h3>${catList('expense')}<button class="lnk" data-act="catadd" data-v="expense">＋ ${t('addCategory')}</button></div>
   <div class="sec"><h3>${t('typeInc')}</h3>${catList('income')}<button class="lnk" data-act="catadd" data-v="income">＋ ${t('addCategory')}</button></div>
   <div class="sec"><h3>${t('language')}</h3><div class="seg"><button class="${S.settings.lang === 'en' ? 'on' : ''}" data-act="lang" data-v="en">English</button><button class="${S.settings.lang === 'bn' ? 'on' : ''}" data-act="lang" data-v="bn">বাংলা</button></div>
@@ -326,21 +395,33 @@ function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add
 /* ---------- transaction form ---------- */
 function txForm(id) {
   const ex = id ? P().tx.find(x => x.id === id) : null;
-  F = ex ? {...ex, amount:String(ex.amount)} : {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:(P().accounts[0] || {}).id, note:''};
+  const ids = P().accounts.map(a => a.id), pick = (id, d) => ids.includes(id) ? id : d;
+  const last = pick(S.settings.lastAcc, 'cash');
+  F = ex ? {from:'bank', to:'cash', acc:last, cat:null, note:'', ...ex, amount:String(ex.amount)}
+         : {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:last, from:pick('bank', ids[0]), to:pick('cash', ids[1] || ids[0]), note:''};
   F.editing = !!ex; renderForm();
 }
 function grab() {
   if (!$('#f_amt')) return;
-  F.amount = $('#f_amt').value; F.date = $('#f_date').value || F.date; F.acc = $('#f_acc').value; F.note = $('#f_note').value;
+  F.amount = $('#f_amt').value; F.date = $('#f_date').value || F.date; F.note = $('#f_note').value;
+  if (F.type === 'transfer') { F.from = $('#f_from').value; F.to = $('#f_to').value; }
 }
 function renderForm() {
+  const isT = F.type === 'transfer';
   const cats = P().categories.filter(c => c.type === F.type);
-  if (!cats.find(c => c.id === F.cat)) F.cat = (cats[0] || {}).id;
-  sheet(`<div class="seg"><button class="${F.type === 'expense' ? 'on' : ''}" data-act="ftype" data-v="expense">${t('expense')}</button><button class="${F.type === 'income' ? 'on' : ''}" data-act="ftype" data-v="income">${t('income')}</button></div>
+  if (!isT && !cats.find(c => c.id === F.cat)) F.cat = (cats[0] || {}).id;
+  const accOpts = sel => P().accounts.map(a => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${accIcon(a.id)} ${esc(accName(a.id))}</option>`).join('');
+  const typeBtn = (k, label) => `<button class="${F.type === k ? 'on' : ''}" data-act="ftype" data-v="${k}">${label}</button>`;
+  const mid = isT
+    ? `<label>${t('fromAcc')}<select id="f_from">${accOpts(F.from)}</select></label><label>${t('toAcc')}<select id="f_to">${accOpts(F.to)}</select></label>`
+    : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}</div>
+       <label>${F.type === 'income' ? t('receivedIn') : t('paidVia')}</label>
+       <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
+  sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}</div>
+  ${isT ? `<p class="hint" style="text-align:center;margin:0">${t('transfer')}</p>` : ''}
   <input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}">
-  <div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}</div>
+  ${mid}
   <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
-  <label>${t('account')}<select id="f_acc">${P().accounts.map(a => `<option value="${a.id}" ${a.id === F.acc ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>
   <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
   <div class="btns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button class="primary" data-act="fsave">${t('save')}</button></div>`);
   if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
@@ -349,8 +430,16 @@ function saveTx() {
   grab();
   const amt = toNum(F.amount);
   if (!(amt > 0)) { toast(t('badAmount')); return; }
-  const rec = {type:F.type, amount:Math.round(amt * 100) / 100, date:F.date, cat:F.cat, acc:F.acc, note:F.note.trim()};
-  if (F.editing) { const x = P().tx.find(y => y.id === F.id); Object.assign(x, rec); }
+  const base = {type:F.type, amount:Math.round(amt * 100) / 100, date:F.date, note:F.note.trim()};
+  let rec;
+  if (F.type === 'transfer') {
+    if (F.from === F.to) { toast(t('sameAcc')); return; }
+    rec = {...base, from:F.from, to:F.to};
+  } else {
+    rec = {...base, cat:F.cat, acc:F.acc};
+    S.settings.lastAcc = F.acc;
+  }
+  if (F.editing) { const i = P().tx.findIndex(y => y.id === F.id); P().tx[i] = {id:F.id, ts:P().tx[i].ts, ...rec}; }
   else P().tx.push({id:uid(), ts:Date.now(), ...rec});
   save(); closeSheet(); render();
 }
@@ -359,7 +448,10 @@ function saveTx() {
 const csvCell = v => { v = String(v ?? ''); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
 function csvOf(list) {
   const rows = [['Date','Type','Category','Account','Amount','Note']];
-  list.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(x => rows.push([x.date, x.type, cat(x.cat).name, accName(x.acc), x.amount, x.note || '']));
+  list.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(x => {
+    if (x.type === 'transfer') rows.push([x.date, 'transfer', '', accName(x.from) + ' -> ' + accName(x.to), x.amount, x.note || '']);
+    else rows.push([x.date, x.type, cat(x.cat).name, accName(x.acc), x.amount, x.note || '']);
+  });
   return '\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
 }
 async function shareFile(name, mime, text) {
@@ -371,7 +463,7 @@ async function shareFile(name, mime, text) {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 function printReport() {
-  const list = inRange().sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
+  const list = inRange().filter(x => x.type !== 'transfer').sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
   list.filter(x => x.type === 'expense').forEach(x => m[x.cat] = (m[x.cat] || 0) + x.amount);
   const rows = Object.entries(m).sort((a, b) => b[1] - a[1]);
   $('#print').innerHTML = `<h2>${t('pdfTitle')}</h2><div>${esc(profName())} · ${esc(periodText())}</div>
@@ -434,9 +526,9 @@ function commitImport(list) {
     const cname = x.cat || 'Other';
     let c = p.categories.find(k => k.type === x.type && (k.name.toLowerCase() === cname.toLowerCase() || (k.bn && k.bn === cname)));
     if (!c) { c = {id:uid(), name:cname, icon:'🏷️', color:pal[p.categories.length % pal.length], type:x.type}; p.categories.push(c); }
-    let a = x.acc ? p.accounts.find(k => k.name.toLowerCase() === x.acc.toLowerCase()) : p.accounts[0];
-    if (!a) { a = {id:uid(), name:x.acc}; p.accounts.push(a); }
-    p.tx.push({id:uid(), ts:Date.now(), type:x.type, amount:x.amount, date:x.date, cat:c.id, acc:a.id, note:x.note});
+    const an = (x.acc || '').toLowerCase();
+    const accId = /card|credit|কার্ড/.test(an) ? 'card' : /bank|ব্যাংক/.test(an) ? 'bank' : 'cash';
+    p.tx.push({id:uid(), ts:Date.now(), type:x.type, amount:x.amount, date:x.date, cat:c.id, acc:accId, note:x.note});
   });
   save(); render();
 }
@@ -463,8 +555,7 @@ const A = {
     if (!confirm(t('delConfirm') + ' ' + profName())) return;
     delete S.data[S.cur]; S.profiles = S.profiles.filter(p => p.id !== S.cur); S.cur = S.profiles[0].id; save(); render();
   },
-  accadd: () => { const n = prompt(t('accName')); if (n && n.trim()) { P().accounts.push({id:uid(), name:n.trim()}); save(); render(); } },
-  accdel: el => { if (P().accounts.length < 2) return; if (confirm(t('delConfirm'))) { P().accounts = P().accounts.filter(a => a.id !== el.dataset.id); save(); render(); } },
+  facc: el => { grab(); F.acc = el.dataset.id; renderForm(); },
   catadd: el => sheet(`<h3>${t('addCategory')}</h3><label>${t('name')}<input id="c_name"></label><label>${t('icon')}<input id="c_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="c_color" value="#4f8cff"></label>
     <div class="btns"><button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="csave" data-v="${el.dataset.v}">${t('save')}</button></div>`),
   csave: el => { const n = $('#c_name').value.trim(); if (!n) return; P().categories.push({id:uid(), name:n, icon:$('#c_icon').value || '🏷️', color:$('#c_color').value, type:el.dataset.v}); save(); closeSheet(); render(); },
@@ -484,13 +575,17 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const id = e.target.id;
-  if (id === 'cf') { U.from = e.target.value || U.from; render(); }
+  if (e.target.dataset && e.target.dataset.open) {
+    const a = P().accounts.find(k => k.id === e.target.dataset.open), v = toNum(e.target.value);
+    if (a) { a.open = isNaN(v) ? 0 : Math.round(v * 100) / 100; save(); toast(t('saved')); }
+  }
+  else if (id === 'cf') { U.from = e.target.value || U.from; render(); }
   else if (id === 'ct') { U.to = e.target.value || U.to; render(); }
   else if (id === 'cur') { S.settings.cur = e.target.value || '৳'; save(); toast(t('saved')); }
   else if (id === 'fRestore' && e.target.files[0]) {
     const f = e.target.files[0]; e.target.value = '';
     f.text().then(txt => {
-      try { const s = JSON.parse(txt); if (!s.profiles || !s.data || !s.cur) throw 0; if (!confirm(t('restoreConfirm'))) return; S = s; save(); render(); toast(t('saved')); }
+      try { const s = JSON.parse(txt); if (!s.profiles || !s.data || !s.cur) throw 0; if (!confirm(t('restoreConfirm'))) return; S = migrate(s); save(); render(); toast(t('saved')); }
       catch (err) { toast(t('badFile')); }
     });
   }
