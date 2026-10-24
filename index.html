@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Expenses">
+<meta name="theme-color" content="#1f7a5c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Day Expenses</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--fg:#17211d;--mut:#6b7872;--line:#e3e8e5;--pri:#1f7a5c;--priT:#fff;--inc:#1f9d6b;--exp:#d6453d;--shadow:0 2px 10px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1512;--card:#18211d;--fg:#e8efec;--mut:#8fa098;--line:#26322d;--pri:#35b58a;--priT:#06150f;--inc:#3ccb92;--exp:#ff6b60;--shadow:none}}
+:root[data-theme=dark]{--bg:#0f1512;--card:#18211d;--fg:#e8efec;--mut:#8fa098;--line:#26322d;--pri:#35b58a;--priT:#06150f;--inc:#3ccb92;--exp:#ff6b60;--shadow:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.4 -apple-system,system-ui,"Segoe UI",Roboto,"Noto Sans Bengali",sans-serif;padding-top:env(safe-area-inset-top);-webkit-text-size-adjust:100%}
+#app{max-width:640px;margin:0 auto;padding:12px 16px 150px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%;min-width:0}
+input[type=color]{padding:2px;height:44px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 0}
+label>input,label>select{margin-top:4px;font-size:16px;color:var(--fg)}
+h1{font-size:22px;margin:0}
+h3{margin:0 0 4px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px;max-width:48%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;margin:8px 0}
+.seg button{flex:1;padding:8px 4px;border-radius:9px;font-size:14px;color:var(--mut)}
+.seg button.on{background:var(--pri);color:var(--priT);font-weight:600}
+.nav{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.nav button{width:44px;height:40px;font-size:26px;border-radius:10px;background:var(--card);border:1px solid var(--line)}
+.nav .lbl{font-weight:600}
+.custom{display:flex;gap:10px;margin-bottom:8px}.custom label{flex:1;margin:0}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}
+.card{background:var(--card);border-radius:14px;padding:10px 10px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.card small{display:block;color:var(--mut);font-size:12px}
+.card b{font-size:15px;word-break:break-word}
+.card.i b{color:var(--inc)}.card.e b{color:var(--exp)}
+.srch{display:flex;gap:8px;margin-bottom:6px}
+.srch input{flex:1}
+.ico{width:44px;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--line);flex:none}
+.dh{display:flex;justify-content:space-between;color:var(--mut);font-size:13px;padding:12px 4px 4px}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:6px}
+.row .ic,.chip .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;flex:none}
+.row .mid{flex:1;min-width:0}.row .mid b{display:block;font-weight:600}
+.row small{color:var(--mut);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.amt{font-weight:700;white-space:nowrap}.amt.income{color:var(--inc)}.amt.expense{color:var(--exp)}
+.empty{text-align:center;color:var(--mut);padding:40px 10px}
+#tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+#tabs button{flex:1;padding:10px 0 8px;font-size:12px;color:var(--mut);display:flex;flex-direction:column;align-items:center;gap:2px}
+#tabs button span{font-size:22px;line-height:1}
+#tabs button.on{color:var(--pri);font-weight:600}
+#fab{position:fixed;right:18px;bottom:calc(76px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;background:var(--pri);color:var(--priT);font-size:32px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:6}
+#sheet{position:fixed;inset:0;z-index:20;display:none}
+#sheet.open{display:block}
+#sheet .back{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+#sheet .panel{position:absolute;left:0;right:0;bottom:0;max-width:640px;margin:0 auto;background:var(--bg);border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+.big{font-size:32px;font-weight:700;text-align:center;margin:10px 0}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border-radius:12px;border:2px solid transparent;background:var(--card);font-size:11px;text-align:center;min-width:0}
+.chip.on{border-color:var(--pri)}
+.chip .ic{width:36px;height:36px}
+.chip>span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btns{display:flex;gap:10px;margin-top:16px}
+.btns button{flex:1;padding:13px;border-radius:12px;font-weight:600;border:1px solid var(--line);background:var(--card)}
+.btns .primary{background:var(--pri);color:var(--priT);border-color:var(--pri)}
+.btns .danger{color:var(--exp)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin:12px 0}
+.sec h3{font-size:15px;margin-bottom:6px}
+.li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.li:first-of-type{border-top:0}
+.li .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li small{color:var(--mut)}
+.x{color:var(--exp);padding:4px 10px;font-size:18px}
+.lnk{color:var(--pri);font-weight:600;padding:8px 0;display:block;text-align:left;width:100%}
+.dot{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:15px;flex:none}
+.pie{width:220px;height:220px;display:block;margin:6px auto}
+.leg .li b{font-weight:600}
+.pct{color:var(--mut);font-size:13px;min-width:44px;text-align:right}
+.hint{color:var(--mut);font-size:13px;margin:8px 0 0}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#222;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+#toast.show{opacity:1}
+#print{display:none}
+@media print{
+  body>*:not(#print){display:none!important}
+  #print{display:block;color:#000;background:#fff;font-size:12px;padding:0}
+  #print h2{margin:0 0 4px}#print table{width:100%;border-collapse:collapse;margin:10px 0}
+  #print td,#print th{border-bottom:1px solid #ccc;padding:4px 6px;text-align:left}
+  #print td.r,#print th.r{text-align:right}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<button id="fab" data-act="add" aria-label="Add">+</button>
+<nav id="tabs"></nav>
+<div id="sheet"></div>
+<div id="toast"></div>
+<div id="print"></div>
+<input type="file" id="fRestore" accept=".json,application/json" hidden>
+<input type="file" id="fCsv" accept=".csv,text/csv,text/plain" hidden>
+
+<script>
+'use strict';
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
+
+/* ---------- translations ---------- */
+const T = {
+  en: {
+    app:'Day Expenses', income:'Income', expense:'Expense', balance:'Balance', home:'Home', reports:'Reports', settings:'Settings',
+    day:'Daily', month:'Monthly', year:'Yearly', custom:'Custom', from:'From', to:'To', save:'Save', delete:'Delete', cancel:'Cancel',
+    amount:'Amount', date:'Date', category:'Category', account:'Account', note:'Note', search:'Search note, category, amount',
+    noTx:'No entries in this period', profiles:'Profiles', accounts:'Accounts', categories:'Categories', language:'Language',
+    theme:'Theme', light:'Light', dark:'Dark', auto:'Auto', currency:'Currency symbol', backup:'Backup (save file)',
+    restore:'Restore from backup', exportCsv:'Export Excel / CSV', exportPdf:'Save PDF report', importCsv:'Import CSV',
+    clearAll:'Delete all data', newProfile:'New profile', rename:'Rename current', switchTo:'Switch profile', name:'Name', icon:'Icon', color:'Color',
+    addCategory:'Add category', addAccount:'Add account', spendingBy:'Expense by category', incomeBy:'Income by category',
+    uncategorized:'Unknown', data:'Data', pdfTitle:'Income & Expense Report', installHint:'To install: Safari → Share → Add to Home Screen',
+    clearConfirm:'All data of ALL profiles will be erased. Sure?', restoreConfirm:'This replaces all current data. Continue?',
+    badAmount:'Enter a valid amount', delConfirm:'Delete?', saved:'Saved', imported:'entries imported', badFile:'Could not read this file',
+    importAsk:'entries found', total:'Total', delProfile:'Delete current profile', profName:'Profile name', accName:'Account name',
+    backupHint:'Your data lives only on this phone. Take a backup regularly and keep it in iCloud Drive / Files.',
+    lastProfile:'You need at least one profile', typeExp:'Expense category', typeInc:'Income category'
+  },
+  bn: {
+    app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
+    day:'দৈনিক', month:'মাসিক', year:'বার্ষিক', custom:'কাস্টম', from:'শুরু', to:'শেষ', save:'সংরক্ষণ', delete:'মুছুন', cancel:'বাতিল',
+    amount:'পরিমাণ', date:'তারিখ', category:'ক্যাটাগরি', account:'অ্যাকাউন্ট', note:'নোট', search:'নোট, ক্যাটাগরি বা পরিমাণ খুঁজুন',
+    noTx:'এই সময়ে কোনো এন্ট্রি নেই', profiles:'প্রোফাইল', accounts:'অ্যাকাউন্ট', categories:'ক্যাটাগরি', language:'ভাষা',
+    theme:'থিম', light:'লাইট', dark:'ডার্ক', auto:'অটো', currency:'মুদ্রার চিহ্ন', backup:'ব্যাকআপ (ফাইল সংরক্ষণ)',
+    restore:'ব্যাকআপ থেকে ফেরত আনুন', exportCsv:'Excel / CSV এক্সপোর্ট', exportPdf:'PDF রিপোর্ট সংরক্ষণ', importCsv:'CSV ইমপোর্ট',
+    clearAll:'সব ডেটা মুছুন', newProfile:'নতুন প্রোফাইল', rename:'বর্তমান প্রোফাইলের নাম বদলান', switchTo:'প্রোফাইল বদলান', name:'নাম', icon:'আইকন', color:'রঙ',
+    addCategory:'নতুন ক্যাটাগরি', addAccount:'নতুন অ্যাকাউন্ট', spendingBy:'ক্যাটাগরি অনুযায়ী খরচ', incomeBy:'ক্যাটাগরি অনুযায়ী আয়',
+    uncategorized:'অজানা', data:'ডেটা', pdfTitle:'আয়-ব্যয়ের রিপোর্ট', installHint:'ইনস্টল করতে: Safari → Share → Add to Home Screen',
+    clearConfirm:'সব প্রোফাইলের সব ডেটা মুছে যাবে। নিশ্চিত?', restoreConfirm:'বর্তমান সব ডেটা বদলে যাবে। চালিয়ে যাবেন?',
+    badAmount:'সঠিক পরিমাণ লিখুন', delConfirm:'মুছে ফেলবেন?', saved:'সংরক্ষিত', imported:'টি এন্ট্রি ইমপোর্ট হয়েছে', badFile:'ফাইলটি পড়া যায়নি',
+    importAsk:'টি এন্ট্রি পাওয়া গেছে', total:'মোট', delProfile:'বর্তমান প্রোফাইল মুছুন', profName:'প্রোফাইলের নাম', accName:'অ্যাকাউন্টের নাম',
+    backupHint:'আপনার ডেটা শুধু এই ফোনেই থাকে। নিয়মিত ব্যাকআপ নিয়ে iCloud Drive / Files-এ রাখুন।',
+    lastProfile:'অন্তত একটা প্রোফাইল থাকতে হবে', typeExp:'খরচের ক্যাটাগরি', typeInc:'আয়ের ক্যাটাগরি'
+  }
+};
+const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
+const loc = () => S.settings.lang === 'bn' ? 'bn-BD' : 'en-GB';
+
+/* ---------- state ---------- */
+const KEY = 'dte_v1';
+function defaultCats() {
+  const e = [['food','Food','খাবার','🍽️','#ef6c4d'],['transport','Transport','যাতায়াত','🚌','#4f8cff'],['shopping','Shopping','কেনাকাটা','🛍️','#c864d8'],
+    ['bills','Bills','বিল','💡','#f2b134'],['health','Health','স্বাস্থ্য','💊','#e5566d'],['edu','Education','শিক্ষা','📚','#3aa6a0'],
+    ['fun','Entertainment','বিনোদন','🎬','#8a6cf0'],['rent','Rent','বাসা ভাড়া','🏠','#7a8b99'],['other','Other','অন্যান্য','📦','#8a8f8c']];
+  const i = [['salary','Salary','বেতন','💼','#1f9d6b'],['business','Business','ব্যবসা','🏪','#2e86c1'],['gift','Gift','উপহার','🎁','#d98ab5'],['oinc','Other','অন্যান্য','💰','#8a8f8c']];
+  return e.map(c => ({id:c[0], name:c[1], bn:c[2], icon:c[3], color:c[4], type:'expense'}))
+    .concat(i.map(c => ({id:c[0], name:c[1], bn:c[2], icon:c[3], color:c[4], type:'income'})));
+}
+function newProfileData() {
+  return { accounts: [{id:'cash', name:'Cash'}, {id:'bank', name:'Bank'}, {id:'wallet', name:'Mobile wallet'}], categories: defaultCats(), tx: [] };
+}
+function fresh() {
+  const pid = uid();
+  return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'en', cur:'৳'} };
+}
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) { const s = JSON.parse(r); if (s && s.profiles && s.data) return s; } } catch (e) {}
+  return fresh();
+}
+let S = load();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Storage error'); } }
+const P = () => S.data[S.cur];
+const profName = () => (S.profiles.find(p => p.id === S.cur) || {name:''}).name;
+const cat = id => P().categories.find(c => c.id === id) || {id, name:t('uncategorized'), icon:'❔', color:'#8a8f8c'};
+const catName = c => (S.settings.lang === 'bn' && c.bn) ? c.bn : c.name;
+const accName = id => (P().accounts.find(a => a.id === id) || {name:'—'}).name;
+const money = n => S.settings.cur + ' ' + Number(n).toLocaleString(loc(), {maximumFractionDigits:2});
+
+/* ---------- ui state ---------- */
+const U = { tab:'home', mode:'month', ref:new Date(), from:ymd(new Date()), to:ymd(new Date()), q:'', rtype:'expense', searching:false };
+let F = null; // transaction form state
+
+function range() {
+  const r = U.ref;
+  if (U.mode === 'day') { const s = ymd(r); return [s, s]; }
+  if (U.mode === 'month') return [ymd(new Date(r.getFullYear(), r.getMonth(), 1)), ymd(new Date(r.getFullYear(), r.getMonth() + 1, 0))];
+  if (U.mode === 'year') return [r.getFullYear() + '-01-01', r.getFullYear() + '-12-31'];
+  return U.from <= U.to ? [U.from, U.to] : [U.to, U.from];
+}
+function shift(n) {
+  const r = new Date(U.ref);
+  if (U.mode === 'day') r.setDate(r.getDate() + n);
+  else if (U.mode === 'month') { r.setDate(1); r.setMonth(r.getMonth() + n); }
+  else if (U.mode === 'year') r.setFullYear(r.getFullYear() + n);
+  U.ref = r; render();
+}
+function label() {
+  const r = U.ref;
+  if (U.mode === 'day') return r.toLocaleDateString(loc(), {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+  if (U.mode === 'month') return r.toLocaleDateString(loc(), {month:'long', year:'numeric'});
+  return String(r.getFullYear());
+}
+const periodText = () => { const [a, b] = range(); return a === b ? a : a + '  →  ' + b; };
+const dateLabel = s => parseYmd(s).toLocaleDateString(loc(), {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+function inRange() { const [a, b] = range(); return P().tx.filter(x => x.date >= a && x.date <= b); }
+function txs() {
+  const q = U.q.trim().toLowerCase();
+  return inRange().filter(x => !q || (x.note || '').toLowerCase().includes(q) || catName(cat(x.cat)).toLowerCase().includes(q) || String(x.amount).includes(q))
+    .sort((m, n) => n.date.localeCompare(m.date) || (n.ts || 0) - (m.ts || 0));
+}
+function sums(list) { let i = 0, e = 0; list.forEach(x => x.type === 'income' ? i += x.amount : e += x.amount); return {i, e, b:i - e}; }
+
+/* ---------- rendering ---------- */
+function applyTheme() {
+  const th = S.settings.theme;
+  if (th === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', th);
+  document.documentElement.lang = S.settings.lang;
+}
+function periodBar() {
+  let h = '<div class="seg">' + ['day','month','year','custom'].map(m => `<button class="${U.mode === m ? 'on' : ''}" data-act="mode" data-v="${m}">${t(m)}</button>`).join('') + '</div>';
+  if (U.mode === 'custom') h += `<div class="custom"><label>${t('from')}<input type="date" id="cf" value="${U.from}"></label><label>${t('to')}<input type="date" id="ct" value="${U.to}"></label></div>`;
+  else h += `<div class="nav"><button data-act="prev" aria-label="prev">‹</button><div class="lbl">${esc(label())}</div><button data-act="next" aria-label="next">›</button></div>`;
+  return h;
+}
+function sumHtml(s) {
+  return `<div class="cards"><div class="card i"><small>${t('income')}</small><b>${money(s.i)}</b></div><div class="card e"><small>${t('expense')}</small><b>${money(s.e)}</b></div><div class="card"><small>${t('balance')}</small><b>${money(s.b)}</b></div></div>`;
+}
+function listHtml(list) {
+  if (!list.length) return `<div class="empty">${t('noTx')}</div>`;
+  const dayNet = {};
+  list.forEach(x => dayNet[x.date] = (dayNet[x.date] || 0) + (x.type === 'income' ? x.amount : -x.amount));
+  let h = '', last = '';
+  list.forEach(x => {
+    if (x.date !== last) { last = x.date; h += `<div class="dh"><span>${esc(dateLabel(x.date))}</span><span>${money(dayNet[x.date])}</span></div>`; }
+    const c = cat(x.cat);
+    h += `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</div>
+      <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${esc(accName(x.acc))}</small></div>
+      <div class="amt ${x.type}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</div></div>`;
+  });
+  return h;
+}
+function renderList() {
+  if (!$('#list')) return;
+  const list = txs();
+  $('#sum').innerHTML = sumHtml(sums(list));
+  $('#list').innerHTML = listHtml(list);
+}
+function homeView() {
+  return `<div class="top"><h1>${t('app')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
+  ${periodBar()}<div id="sum"></div>
+  <div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>
+  <div id="list"></div>`;
+}
+function pie(items, total) {
+  if (!items.length) return '';
+  const R = 90, cx = 100, cy = 100; let a0 = -Math.PI / 2, paths = '';
+  if (items.length === 1) paths = `<circle cx="100" cy="100" r="${R}" fill="${items[0].color}"/>`;
+  else items.forEach(it => {
+    const a1 = a0 + it.v / total * 2 * Math.PI;
+    const x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0), x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
+    paths += `<path d="M${cx},${cy} L${x0.toFixed(2)},${y0.toFixed(2)} A${R},${R} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z" fill="${it.color}"/>`;
+    a0 = a1;
+  });
+  return `<svg viewBox="0 0 200 200" class="pie">${paths}<circle cx="100" cy="100" r="50" fill="var(--bg)"/></svg>`;
+}
+function reportsView() {
+  const list = inRange(), type = U.rtype, m = {};
+  list.filter(x => x.type === type).forEach(x => m[x.cat] = (m[x.cat] || 0) + x.amount);
+  const items = Object.entries(m).map(([id, v]) => { const c = cat(id); return {id, v, name:catName(c), icon:c.icon, color:c.color}; }).sort((a, b) => b.v - a.v);
+  const total = items.reduce((s, i) => s + i.v, 0), s = sums(list);
+  return `<div class="top"><h1>${t('reports')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
+  ${periodBar()}${sumHtml(s)}
+  <div class="seg"><button class="${type === 'expense' ? 'on' : ''}" data-act="rtype" data-v="expense">${t('expense')}</button><button class="${type === 'income' ? 'on' : ''}" data-act="rtype" data-v="income">${t('income')}</button></div>
+  <div class="sec"><h3>${type === 'expense' ? t('spendingBy') : t('incomeBy')}</h3>
+  ${items.length ? pie(items, total) : `<div class="empty">${t('noTx')}</div>`}
+  <div class="leg">${items.map(i => `<div class="li"><span class="dot" style="background:${i.color}22;color:${i.color}">${esc(i.icon)}</span><span class="n"><b>${esc(i.name)}</b></span><span>${money(i.v)}</span><span class="pct">${(i.v / total * 100).toFixed(1)}%</span></div>`).join('')}</div></div>
+  <div class="sec"><button class="lnk" data-act="exportpdf">📄 ${t('exportPdf')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button></div>`;
+}
+function settingsView() {
+  const p = P();
+  const net = {}; p.tx.forEach(x => net[x.acc] = (net[x.acc] || 0) + (x.type === 'income' ? x.amount : -x.amount));
+  const catList = type => p.categories.filter(c => c.type === type).map(c => `<div class="li"><span class="dot" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span class="n">${esc(catName(c))}</span><button class="x" data-act="catdel" data-id="${c.id}">✕</button></div>`).join('');
+  const standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  return `<div class="top"><h1>${t('settings')}</h1></div>
+  <div class="sec"><h3>${t('profiles')}</h3>
+    ${S.profiles.map(pr => `<div class="li"><span class="n">${esc(pr.name)}${pr.id === S.cur ? ' ✓' : ''}</span>${pr.id === S.cur ? '' : `<button class="lnk" style="width:auto" data-act="pswitch" data-id="${pr.id}">${t('switchTo')}</button>`}</div>`).join('')}
+    <button class="lnk" data-act="pnew">＋ ${t('newProfile')}</button><button class="lnk" data-act="prename">✎ ${t('rename')}</button><button class="lnk" style="color:var(--exp)" data-act="pdel">🗑 ${t('delProfile')}</button></div>
+  <div class="sec"><h3>${t('accounts')}</h3>
+    ${p.accounts.map(a => `<div class="li"><span class="n">${esc(a.name)}</span><small>${money(net[a.id] || 0)}</small><button class="x" data-act="accdel" data-id="${a.id}">✕</button></div>`).join('')}
+    <button class="lnk" data-act="accadd">＋ ${t('addAccount')}</button></div>
+  <div class="sec"><h3>${t('typeExp')}</h3>${catList('expense')}<button class="lnk" data-act="catadd" data-v="expense">＋ ${t('addCategory')}</button></div>
+  <div class="sec"><h3>${t('typeInc')}</h3>${catList('income')}<button class="lnk" data-act="catadd" data-v="income">＋ ${t('addCategory')}</button></div>
+  <div class="sec"><h3>${t('language')}</h3><div class="seg"><button class="${S.settings.lang === 'en' ? 'on' : ''}" data-act="lang" data-v="en">English</button><button class="${S.settings.lang === 'bn' ? 'on' : ''}" data-act="lang" data-v="bn">বাংলা</button></div>
+    <h3 style="margin-top:10px">${t('theme')}</h3><div class="seg">${['auto','light','dark'].map(x => `<button class="${S.settings.theme === x ? 'on' : ''}" data-act="theme" data-v="${x}">${t(x)}</button>`).join('')}</div>
+    <label>${t('currency')}<input id="cur" value="${esc(S.settings.cur)}" maxlength="5"></label></div>
+  <div class="sec"><h3>${t('data')}</h3>
+    <button class="lnk" data-act="backup">💾 ${t('backup')}</button><button class="lnk" data-act="restore">♻️ ${t('restore')}</button>
+    <button class="lnk" data-act="importcsv">📥 ${t('importCsv')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button>
+    <button class="lnk" style="color:var(--exp)" data-act="clearall">⚠️ ${t('clearAll')}</button>
+    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}</div>`;
+}
+function render() {
+  applyTheme();
+  const v = U.tab === 'home' ? homeView() : U.tab === 'reports' ? reportsView() : settingsView();
+  $('#app').innerHTML = v;
+  $('#fab').style.display = U.tab === 'settings' ? 'none' : '';
+  $('#tabs').innerHTML = [['home','🏠'],['reports','📊'],['settings','⚙️']].map(([k, e]) => `<button class="${U.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}"><span>${e}</span>${t(k)}</button>`).join('');
+  if (U.tab === 'home') renderList();
+}
+
+/* ---------- sheet / toast ---------- */
+function sheet(html) { const s = $('#sheet'); s.innerHTML = `<div class="back" data-act="closeSheet"></div><div class="panel">${html}</div>`; s.classList.add('open'); }
+function closeSheet() { const s = $('#sheet'); s.classList.remove('open'); s.innerHTML = ''; }
+let toastTimer;
+function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200); }
+
+/* ---------- transaction form ---------- */
+function txForm(id) {
+  const ex = id ? P().tx.find(x => x.id === id) : null;
+  F = ex ? {...ex, amount:String(ex.amount)} : {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:(P().accounts[0] || {}).id, note:''};
+  F.editing = !!ex; renderForm();
+}
+function grab() {
+  if (!$('#f_amt')) return;
+  F.amount = $('#f_amt').value; F.date = $('#f_date').value || F.date; F.acc = $('#f_acc').value; F.note = $('#f_note').value;
+}
+function renderForm() {
+  const cats = P().categories.filter(c => c.type === F.type);
+  if (!cats.find(c => c.id === F.cat)) F.cat = (cats[0] || {}).id;
+  sheet(`<div class="seg"><button class="${F.type === 'expense' ? 'on' : ''}" data-act="ftype" data-v="expense">${t('expense')}</button><button class="${F.type === 'income' ? 'on' : ''}" data-act="ftype" data-v="income">${t('income')}</button></div>
+  <input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}">
+  <div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}</div>
+  <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
+  <label>${t('account')}<select id="f_acc">${P().accounts.map(a => `<option value="${a.id}" ${a.id === F.acc ? 'selected' : ''}>${esc(a.name)}</option>`).join('')}</select></label>
+  <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
+  <div class="btns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button class="primary" data-act="fsave">${t('save')}</button></div>`);
+  if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
+}
+function saveTx() {
+  grab();
+  const amt = toNum(F.amount);
+  if (!(amt > 0)) { toast(t('badAmount')); return; }
+  const rec = {type:F.type, amount:Math.round(amt * 100) / 100, date:F.date, cat:F.cat, acc:F.acc, note:F.note.trim()};
+  if (F.editing) { const x = P().tx.find(y => y.id === F.id); Object.assign(x, rec); }
+  else P().tx.push({id:uid(), ts:Date.now(), ...rec});
+  save(); closeSheet(); render();
+}
+
+/* ---------- export / import ---------- */
+const csvCell = v => { v = String(v ?? ''); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+function csvOf(list) {
+  const rows = [['Date','Type','Category','Account','Amount','Note']];
+  list.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(x => rows.push([x.date, x.type, cat(x.cat).name, accName(x.acc), x.amount, x.note || '']));
+  return '\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+}
+async function shareFile(name, mime, text) {
+  const file = new File([text], name, {type:mime});
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    try { await navigator.share({files:[file], title:name}); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+function printReport() {
+  const list = inRange().sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
+  list.filter(x => x.type === 'expense').forEach(x => m[x.cat] = (m[x.cat] || 0) + x.amount);
+  const rows = Object.entries(m).sort((a, b) => b[1] - a[1]);
+  $('#print').innerHTML = `<h2>${t('pdfTitle')}</h2><div>${esc(profName())} · ${esc(periodText())}</div>
+  <table><tr><th>${t('income')}</th><th>${t('expense')}</th><th>${t('balance')}</th></tr><tr><td>${money(s.i)}</td><td>${money(s.e)}</td><td>${money(s.b)}</td></tr></table>
+  ${rows.length ? `<table><tr><th>${t('spendingBy')}</th><th class="r">${t('amount')}</th></tr>${rows.map(([id, v]) => `<tr><td>${esc(catName(cat(id)))}</td><td class="r">${money(v)}</td></tr>`).join('')}</table>` : ''}
+  <table><tr><th>${t('date')}</th><th>${t('category')}</th><th>${t('account')}</th><th>${t('note')}</th><th class="r">${t('amount')}</th></tr>
+  ${list.map(x => `<tr><td>${x.date}</td><td>${esc(catName(cat(x.cat)))}</td><td>${esc(accName(x.acc))}</td><td>${esc(x.note || '')}</td><td class="r">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</td></tr>`).join('')}</table>`;
+  window.print();
+}
+function parseCSV(text) {
+  text = text.replace(/^\ufeff/, '');
+  const first = text.split(/\r?\n/)[0] || '', c = first.split(',').length;
+  const delim = first.split(';').length > c ? ';' : first.split('\t').length > c ? '\t' : ',';
+  const rows = []; let row = [], cur = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+    else if (ch === '"') q = true;
+    else if (ch === delim) { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); cur = ''; rows.push(row); row = []; }
+    else cur += ch;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+function parseDate(s) {
+  s = toLatin(String(s).trim()); let m;
+  if ((m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+  if ((m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))) { let y = +m[3]; if (y < 100) y += 2000; return y + '-' + pad(m[2]) + '-' + pad(m[1]); }
+  const d = new Date(s); return isNaN(d) ? null : ymd(d);
+}
+function rowsToTx(rows) {
+  const h = rows[0].map(x => x.trim().toLowerCase()), find = re => h.findIndex(x => re.test(x));
+  const ci = {date:find(/date|তারিখ/), type:find(/^type|ধরন|^kind/), cat:find(/categ|ক্যাটাগরি/), acc:find(/account|অ্যাকাউন্ট|wallet/),
+    amt:find(/amount|পরিমাণ|^sum|^value/), note:find(/note|desc|memo|remark|নোট|detail/), inc:find(/^income|^credit/), exp:find(/^expense|^debit|^spent/)};
+  if (ci.date < 0 || (ci.amt < 0 && ci.inc < 0 && ci.exp < 0)) return null;
+  const body = rows.slice(1), out = [];
+  const amts = ci.amt >= 0 ? body.map(r => toNum(r[ci.amt])).filter(n => !isNaN(n)) : [];
+  const signed = ci.type < 0 && ci.inc < 0 && amts.some(n => n < 0) && amts.some(n => n > 0);
+  body.forEach(r => {
+    const date = parseDate(r[ci.date] || ''); if (!date) return;
+    let type = 'expense', amount;
+    if (ci.inc >= 0 || ci.exp >= 0) {
+      const iv = ci.inc >= 0 ? toNum(r[ci.inc]) : NaN, ev = ci.exp >= 0 ? toNum(r[ci.exp]) : NaN;
+      if (iv > 0) { type = 'income'; amount = iv; } else if (ev > 0) amount = ev; else if (ci.amt >= 0) amount = Math.abs(toNum(r[ci.amt])); else return;
+    } else {
+      const v = toNum(r[ci.amt]); if (isNaN(v) || v === 0) return;
+      amount = Math.abs(v);
+      if (ci.type >= 0) type = /inc|credit|^in$|\+|আয়/i.test(r[ci.type] || '') ? 'income' : 'expense';
+      else if (signed) type = v > 0 ? 'income' : 'expense';
+    }
+    if (!(amount > 0)) return;
+    out.push({date, type, amount:Math.round(amount * 100) / 100, cat:ci.cat >= 0 ? (r[ci.cat] || '').trim() : '', acc:ci.acc >= 0 ? (r[ci.acc] || '').trim() : '', note:ci.note >= 0 ? (r[ci.note] || '').trim() : ''});
+  });
+  return out;
+}
+function commitImport(list) {
+  const p = P(), pal = ['#ef6c4d','#4f8cff','#c864d8','#f2b134','#3aa6a0','#8a6cf0','#7a8b99','#e5566d'];
+  list.forEach(x => {
+    const cname = x.cat || 'Other';
+    let c = p.categories.find(k => k.type === x.type && (k.name.toLowerCase() === cname.toLowerCase() || (k.bn && k.bn === cname)));
+    if (!c) { c = {id:uid(), name:cname, icon:'🏷️', color:pal[p.categories.length % pal.length], type:x.type}; p.categories.push(c); }
+    let a = x.acc ? p.accounts.find(k => k.name.toLowerCase() === x.acc.toLowerCase()) : p.accounts[0];
+    if (!a) { a = {id:uid(), name:x.acc}; p.accounts.push(a); }
+    p.tx.push({id:uid(), ts:Date.now(), type:x.type, amount:x.amount, date:x.date, cat:c.id, acc:a.id, note:x.note});
+  });
+  save(); render();
+}
+
+/* ---------- actions ---------- */
+const A = {
+  mode: el => { U.mode = el.dataset.v; render(); },
+  prev: () => shift(-1), next: () => shift(1),
+  tab: el => { U.tab = el.dataset.v; closeSheet(); render(); window.scrollTo(0, 0); },
+  add: () => txForm(), edit: el => txForm(el.dataset.id),
+  closeSheet: closeSheet,
+  ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; renderForm(); },
+  fcat: el => { grab(); F.cat = el.dataset.id; renderForm(); },
+  fsave: saveTx,
+  fdel: () => { if (confirm(t('delConfirm'))) { P().tx = P().tx.filter(x => x.id !== F.id); save(); closeSheet(); render(); } },
+  search: () => { U.searching = !U.searching; if (!U.searching) U.q = ''; render(); if (U.searching) { const q = $('#q'); if (q) q.focus(); } },
+  rtype: el => { U.rtype = el.dataset.v; render(); },
+  profileMenu: () => sheet(`<h3>${t('switchTo')}</h3>${S.profiles.map(p => `<div class="li"><button class="lnk" data-act="pswitch" data-id="${p.id}">${esc(p.name)}${p.id === S.cur ? ' ✓' : ''}</button></div>`).join('')}<button class="lnk" data-act="pnew">＋ ${t('newProfile')}</button>`),
+  pswitch: el => { S.cur = el.dataset.id; save(); closeSheet(); render(); },
+  pnew: () => { const n = prompt(t('profName')); if (n && n.trim()) { const id = uid(); S.profiles.push({id, name:n.trim()}); S.data[id] = newProfileData(); S.cur = id; save(); closeSheet(); render(); } },
+  prename: () => { const n = prompt(t('profName'), profName()); if (n && n.trim()) { S.profiles.find(p => p.id === S.cur).name = n.trim(); save(); render(); } },
+  pdel: () => {
+    if (S.profiles.length < 2) { toast(t('lastProfile')); return; }
+    if (!confirm(t('delConfirm') + ' ' + profName())) return;
+    delete S.data[S.cur]; S.profiles = S.profiles.filter(p => p.id !== S.cur); S.cur = S.profiles[0].id; save(); render();
+  },
+  accadd: () => { const n = prompt(t('accName')); if (n && n.trim()) { P().accounts.push({id:uid(), name:n.trim()}); save(); render(); } },
+  accdel: el => { if (P().accounts.length < 2) return; if (confirm(t('delConfirm'))) { P().accounts = P().accounts.filter(a => a.id !== el.dataset.id); save(); render(); } },
+  catadd: el => sheet(`<h3>${t('addCategory')}</h3><label>${t('name')}<input id="c_name"></label><label>${t('icon')}<input id="c_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="c_color" value="#4f8cff"></label>
+    <div class="btns"><button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="csave" data-v="${el.dataset.v}">${t('save')}</button></div>`),
+  csave: el => { const n = $('#c_name').value.trim(); if (!n) return; P().categories.push({id:uid(), name:n, icon:$('#c_icon').value || '🏷️', color:$('#c_color').value, type:el.dataset.v}); save(); closeSheet(); render(); },
+  catdel: el => { if (confirm(t('delConfirm'))) { P().categories = P().categories.filter(c => c.id !== el.dataset.id); save(); render(); } },
+  lang: el => { S.settings.lang = el.dataset.v; save(); render(); },
+  theme: el => { S.settings.theme = el.dataset.v; save(); render(); },
+  backup: () => shareFile('expenses-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)),
+  restore: () => $('#fRestore').click(),
+  importcsv: () => $('#fCsv').click(),
+  exportcsv: () => shareFile('expenses-' + range()[0] + '_' + range()[1] + '.csv', 'text/csv', csvOf(U.tab === 'settings' ? P().tx : inRange())),
+  exportpdf: printReport,
+  clearall: () => { if (confirm(t('clearConfirm'))) { const lang = S.settings.lang; S = fresh(); S.settings.lang = lang; save(); render(); } }
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && A[el.dataset.act]) A[el.dataset.act](el); });
+document.addEventListener('input', e => {
+  if (e.target.id === 'q') { U.q = e.target.value; renderList(); }
+});
+document.addEventListener('change', e => {
+  const id = e.target.id;
+  if (id === 'cf') { U.from = e.target.value || U.from; render(); }
+  else if (id === 'ct') { U.to = e.target.value || U.to; render(); }
+  else if (id === 'cur') { S.settings.cur = e.target.value || '৳'; save(); toast(t('saved')); }
+  else if (id === 'fRestore' && e.target.files[0]) {
+    const f = e.target.files[0]; e.target.value = '';
+    f.text().then(txt => {
+      try { const s = JSON.parse(txt); if (!s.profiles || !s.data || !s.cur) throw 0; if (!confirm(t('restoreConfirm'))) return; S = s; save(); render(); toast(t('saved')); }
+      catch (err) { toast(t('badFile')); }
+    });
+  }
+  else if (id === 'fCsv' && e.target.files[0]) {
+    const f = e.target.files[0]; e.target.value = '';
+    f.text().then(txt => {
+      const list = rowsToTx(parseCSV(txt) || []);
+      if (!list || !list.length) { toast(t('badFile')); return; }
+      const s = sums(list);
+      if (confirm(list.length + ' ' + t('importAsk') + '\n' + t('income') + ': ' + money(s.i) + '\n' + t('expense') + ': ' + money(s.e))) { commitImport(list); toast(list.length + ' ' + t('imported')); }
+    });
+  }
+});
+
+/* ---------- start ---------- */
+render();
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
