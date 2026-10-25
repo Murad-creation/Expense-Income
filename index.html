@@ -103,6 +103,22 @@ label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padd
 .bkp span{flex:1}
 .bkp button{background:var(--pri);color:var(--priT);border-radius:10px;padding:8px 12px;font-weight:600;white-space:nowrap}
 .amt.tr{color:var(--mut)}
+.cards.two{grid-template-columns:repeat(2,1fr)}
+.chips.two{grid-template-columns:repeat(2,1fr)}
+.chips.two .chip{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px 10px;font-size:13px}
+.day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 6px;margin-bottom:12px}
+.dayh{font-weight:700;margin-bottom:8px}
+.dsum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
+.dsum>div{background:var(--bg);border-radius:10px;padding:6px 8px;min-width:0}
+.dsum small{display:block;color:var(--mut);font-size:11px}
+.dsum b{font-size:13px;word-break:break-word}
+.dsum .i b{color:var(--inc)}.dsum .e b{color:var(--exp)}
+.dsec{margin-top:8px}
+.dst{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--mut);padding:6px 2px 2px}
+.dst.i b{color:var(--inc)}.dst.e b{color:var(--exp)}
+.day .row{border:0;border-top:1px solid var(--line);border-radius:0;background:none;margin:0;padding:10px 2px}
+.day .dst+.row{border-top:0}
+.row .av{background:var(--pri);color:var(--priT);font-weight:700;border-radius:50%}
 #print{display:none}
 @media print{
   body>*:not(#print){display:none!important}
@@ -136,6 +152,8 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
+const VERSION = '2.1';
+
 /* ---------- translations ---------- */
 const T = {
   en: {
@@ -161,7 +179,15 @@ const T = {
     accUsed:'This account has entries, so it cannot be deleted',
     newCategory:'New category', close:'Close', backupNow:'Back up now', backupRemind:'Backup reminder', remOff:'Off', remDay:'Every day', remWeek:'Every 7 days', remMonth:'Every 30 days',
     lastBackup:'Last backup', never:'Never', backupDue:'Time to back up your data to iCloud Drive',
-    icloudHint:'iPhone web apps cannot save to iCloud silently. Tap Back up, then Save to Files and choose iCloud Drive. The app reminds you on your schedule.'
+    icloudHint:'iPhone web apps cannot save to iCloud silently. Tap Back up, then Save to Files and choose iCloud Drive. The app reminds you on your schedule.',
+    version:'Version', incomeDetails:'Income details', expenseDetails:'Expense details', otherDetails:'Transfers & loans',
+    loans:'Loans', loanTab:'Personal loan', toReceive:'To receive', toPay:'To pay', person:'Person', loanWhat:'What happened', loanShort:'Loan',
+    lt_lend:'I lent', lt_borrow:'I borrowed', lt_receive:'Got paid back', lt_repay:'I paid back',
+    newLoan:'New loan entry', settled:'Settled', owesYou:'owes you', youOwe:'You owe', personReq:'Enter the person\'s name', noLoans:'No loans yet',
+    receiveMoney:'Money received', payBack:'I paid back', addEntry:'New entry',
+    loanLent:'Lent to', loanBorrowed:'Borrowed from', loanReceived:'Received from', loanPaid:'Paid back to',
+    loanHint:'Lending takes money out of the account you pick, so Total cash in hand goes down. Borrowing adds it. Receiving or paying back adjusts the same account the same way.',
+    newVersion:'New version available', reload:'Update now'
   },
   bn: {
     app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
@@ -186,7 +212,15 @@ const T = {
     accUsed:'এই অ্যাকাউন্টে এন্ট্রি আছে, তাই মোছা যাবে না',
     newCategory:'নতুন ক্যাটাগরি', close:'বন্ধ', backupNow:'এখন ব্যাকআপ নিন', backupRemind:'ব্যাকআপ রিমাইন্ডার', remOff:'বন্ধ', remDay:'প্রতিদিন', remWeek:'প্রতি ৭ দিনে', remMonth:'প্রতি ৩০ দিনে',
     lastBackup:'শেষ ব্যাকআপ', never:'কখনো না', backupDue:'iCloud Drive-এ ডেটার ব্যাকআপ নেওয়ার সময় হয়েছে',
-    icloudHint:'আইফোনের ওয়েব অ্যাপ নিজে থেকে চুপচাপ iCloud-এ সেভ করতে পারে না। "ব্যাকআপ" চেপে "Save to Files" দিন, তারপর iCloud Drive বেছে নিন। অ্যাপ আপনার ঠিক করা সময় অনুযায়ী মনে করিয়ে দেবে।'
+    icloudHint:'আইফোনের ওয়েব অ্যাপ নিজে থেকে চুপচাপ iCloud-এ সেভ করতে পারে না। "ব্যাকআপ" চেপে "Save to Files" দিন, তারপর iCloud Drive বেছে নিন। অ্যাপ আপনার ঠিক করা সময় অনুযায়ী মনে করিয়ে দেবে।',
+    version:'ভার্সন', incomeDetails:'আয়ের বিবরণ', expenseDetails:'খরচের বিবরণ', otherDetails:'ট্রান্সফার ও লোন',
+    loans:'লোন', loanTab:'পার্সোনাল লোন', toReceive:'পাব', toPay:'দেব', person:'ব্যক্তির নাম', loanWhat:'কী হয়েছে', loanShort:'লোন',
+    lt_lend:'ধার দিলাম', lt_borrow:'ধার নিলাম', lt_receive:'ফেরত পেলাম', lt_repay:'ফেরত দিলাম',
+    newLoan:'নতুন লোন এন্ট্রি', settled:'পরিশোধিত', owesYou:'আপনাকে দেবে', youOwe:'আপনি দেবেন', personReq:'ব্যক্তির নাম লিখুন', noLoans:'এখনো কোনো লোন নেই',
+    receiveMoney:'টাকা পেয়েছি', payBack:'টাকা ফেরত দিয়েছি', addEntry:'নতুন এন্ট্রি',
+    loanLent:'ধার দিয়েছি', loanBorrowed:'ধার নিয়েছি', loanReceived:'ফেরত পেয়েছি', loanPaid:'ফেরত দিয়েছি',
+    loanHint:'ধার দিলে যে অ্যাকাউন্ট বাছবেন তা থেকে টাকা কমবে, তাই মোট ক্যাশ ইন হ্যান্ডও কমবে। ধার নিলে বাড়বে। টাকা ফেরত পেলে বা দিলে একই অ্যাকাউন্টে একই নিয়মে সমন্বয় হবে।',
+    newVersion:'নতুন ভার্সন এসেছে', reload:'এখনই আপডেট করুন'
   }
 };
 const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
@@ -254,6 +288,26 @@ const accKind = id => { const a = accOf(id); return a ? kindOfAcc(a) : 'bank'; }
 const accName = id => { const a = accOf(id); return !a ? '—' : (STD.includes(a.id) && a.name === STD_NAME[a.id]) ? t(a.id) : a.name; };
 const accIcon = id => ({bank:'🏦', cash:'💵', card:'💳'})[accKind(id)];
 const accColor = id => ({bank:'#2e86c1', cash:'#1f9d6b', card:'#c864d8'})[accKind(id)];
+// personal loans: effect on the chosen account, and on what the person owes me (+ = they owe me)
+const LOAN_ACC = {lend:-1, borrow:1, receive:1, repay:-1};
+const LOAN_LED = {lend:1, borrow:-1, receive:-1, repay:1};
+const pkey = n => String(n || '').trim().toLowerCase();
+function loanPeople() {
+  const m = {};
+  P().tx.forEach(x => {
+    if (x.type !== 'loan') return;
+    const k = pkey(x.person), o = m[k] || (m[k] = {key:k, name:String(x.person || '').trim(), bal:0, last:'', items:[]});
+    o.bal += LOAN_LED[x.ltype] * x.amount; o.items.push(x);
+    if (x.date >= o.last) o.last = x.date;   // the name keeps the spelling it was first entered with
+  });
+  const list = Object.values(m);
+  list.forEach(o => o.bal = Math.round(o.bal * 100) / 100);
+  return list.sort((a, b) => ((b.bal !== 0) - (a.bal !== 0)) || Math.abs(b.bal) - Math.abs(a.bal) || b.last.localeCompare(a.last));
+}
+function loanTotals(ps) {
+  ps = ps || loanPeople();
+  return {recv:ps.filter(p => p.bal > 0).reduce((s, p) => s + p.bal, 0), pay:ps.filter(p => p.bal < 0).reduce((s, p) => s - p.bal, 0)};
+}
 function balances() {
   const b = {};
   P().accounts.forEach(a => b[a.id] = a.open || 0);
@@ -261,6 +315,7 @@ function balances() {
     if (x.type === 'income') b[x.acc] = (b[x.acc] || 0) + x.amount;
     else if (x.type === 'expense') b[x.acc] = (b[x.acc] || 0) - x.amount;
     else if (x.type === 'transfer') { b[x.from] = (b[x.from] || 0) - x.amount; b[x.to] = (b[x.to] || 0) + x.amount; }
+    else if (x.type === 'loan') b[x.acc] = (b[x.acc] || 0) + LOAN_ACC[x.ltype] * x.amount;
   });
   return b;
 }
@@ -292,12 +347,16 @@ function label() {
 }
 const periodText = () => { const [a, b] = range(); return a === b ? a : a + '  →  ' + b; };
 const dateLabel = s => parseYmd(s).toLocaleDateString(loc(), {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+function ensureVisible(date) {
+  const [a, b] = range();
+  if (date < a || date > b) { U.ref = parseYmd(date); if (U.mode === 'custom') U.mode = 'month'; }
+}
 function inRange() { const [a, b] = range(); return P().tx.filter(x => x.date >= a && x.date <= b); }
 function txs() {
   const q = U.q.trim().toLowerCase();
   return inRange().filter(x => {
     if (!q) return true;
-    const cn = x.type === 'transfer' ? t('transferShort') + ' ' + t('withdraw') : catName(cat(x.cat));
+    const cn = x.type === 'transfer' ? t('transferShort') + ' ' + t('withdraw') : x.type === 'loan' ? loanLabel(x) : catName(cat(x.cat));
     const an = x.type === 'transfer' ? accName(x.from) + ' ' + accName(x.to) : accName(x.acc);
     return (x.note || '').toLowerCase().includes(q) || cn.toLowerCase().includes(q) || an.toLowerCase().includes(q) || String(x.amount).includes(q);
   }).sort((m, n) => n.date.localeCompare(m.date) || (n.ts || 0) - (m.ts || 0));
@@ -331,25 +390,41 @@ function periodBar() {
 function sumHtml(s) {
   return `<div class="cards"><div class="card i"><small>${t('income')}</small><b>${money(s.i)}</b></div><div class="card e"><small>${t('expense')}</small><b>${money(s.e)}</b></div><div class="card"><small>${t('balance')}</small><b>${money(s.b)}</b></div></div>`;
 }
-function listHtml(list) {
-  if (!list.length) return `<div class="empty">${t('noTx')}</div>`;
-  const dayNet = {};
-  list.forEach(x => dayNet[x.date] = (dayNet[x.date] || 0) + (x.type === 'income' ? x.amount : x.type === 'expense' ? -x.amount : 0));
-  let h = '', last = '';
-  list.forEach(x => {
-    if (x.date !== last) { last = x.date; h += `<div class="dh"><span>${esc(dateLabel(x.date))}</span><span>${money(dayNet[x.date])}</span></div>`; }
-    if (x.type === 'transfer') {
-      h += `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:#7a8b9922;color:#7a8b99">🔄</div>
+const loanLabel = x => t({lend:'loanLent', borrow:'loanBorrowed', receive:'loanReceived', repay:'loanPaid'}[x.ltype] || 'loanShort') + ' ' + (x.person || '');
+function rowHtml(x) {
+  if (x.type === 'transfer') {
+    return `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:#7a8b9922;color:#7a8b99">🔄</div>
       <div class="mid"><b>${t(x.to === 'cash' && x.from !== 'cash' ? 'withdraw' : 'transferShort')}</b><small>${accIcon(x.from)} ${esc(accName(x.from))} → ${accIcon(x.to)} ${esc(accName(x.to))}${x.note ? ' · ' + esc(x.note) : ''}</small></div>
       <div class="amt tr">${money(x.amount)}</div></div>`;
-      return;
-    }
-    const c = cat(x.cat);
-    h += `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</div>
+  }
+  if (x.type === 'loan') {
+    const plus = LOAN_ACC[x.ltype] > 0;
+    return `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:#2e86c122;color:#2e86c1">🤝</div>
+      <div class="mid"><b>${esc(loanLabel(x))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${accIcon(x.acc)} ${esc(accName(x.acc))}</small></div>
+      <div class="amt ${plus ? 'income' : 'expense'}">${plus ? '+' : '−'}${money(x.amount)}</div></div>`;
+  }
+  const c = cat(x.cat);
+  return `<div class="row" data-act="edit" data-id="${x.id}"><div class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</div>
       <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${accIcon(x.acc)} ${esc(accName(x.acc))}</small></div>
       <div class="amt ${x.type}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</div></div>`;
-  });
-  return h;
+}
+// one card per day: that day's income, expense and balance, then income details and expense details
+function listHtml(list) {
+  if (!list.length) return `<div class="empty">${t('noTx')}</div>`;
+  const days = [], by = {};
+  list.forEach(x => { if (!by[x.date]) { by[x.date] = {date:x.date, items:[]}; days.push(by[x.date]); } by[x.date].items.push(x); });
+  return days.map(d => {
+    const s = sums(d.items), part = f => d.items.filter(f);
+    const inc = part(x => x.type === 'income'), exp = part(x => x.type === 'expense'), oth = part(x => x.type === 'transfer' || x.type === 'loan');
+    const sec = (title, arr, total, cls) => arr.length ? `<div class="dsec"><div class="dst ${cls}"><span>${title}</span>${total === null ? '' : `<b>${money(total)}</b>`}</div>${arr.map(rowHtml).join('')}</div>` : '';
+    return `<div class="day"><div class="dayh">${esc(dateLabel(d.date))}</div>
+      <div class="dsum"><div class="i"><small>${t('income')}</small><b>${money(s.i)}</b></div><div class="e"><small>${t('expense')}</small><b>${money(s.e)}</b></div><div class="b"><small>${t('balance')}</small><b style="color:${s.b < 0 ? 'var(--exp)' : 'inherit'}">${money(s.b)}</b></div></div>
+      ${sec(t('incomeDetails'), inc, s.i, 'i')}${sec(t('expenseDetails'), exp, s.e, 'e')}${sec(t('otherDetails'), oth, null, '')}</div>`;
+  }).join('');
+}
+function loanBox() {
+  const tot = loanTotals();
+  return `<div class="acc" data-act="tab" data-v="loans" style="cursor:pointer"><small>🤝 ${t('loanTab')}</small><b style="color:var(--inc)">${t('toReceive')}: ${money(tot.recv)}</b><small style="color:var(--exp)">${t('toPay')}: ${money(tot.pay)}</small></div>`;
 }
 function accountsHtml() {
   const b = balances(), accs = P().accounts;
@@ -361,7 +436,7 @@ function accountsHtml() {
     return `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b style="color:${bal < 0 ? 'var(--exp)' : 'inherit'}">${money(bal)}</b>${sub}</div>`;
   };
   return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
-  <div class="accs">${accs.map(a => a.kind === 'card' ? card(a) : `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}</div>`;
+  <div class="accs">${accs.map(a => a.kind === 'card' ? card(a) : `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}${loanBox()}</div>`;
 }
 function backupDue() {
   const st = S.settings, days = st.backupDays;
@@ -369,6 +444,9 @@ function backupDue() {
   const any = S.profiles.some(p => (S.data[p.id].tx || []).length);
   if (!any) return false;
   return (Date.now() - (st.lastBackup || st.firstUse || Date.now())) / 864e5 >= days;
+}
+function updateBanner() {
+  return U.update ? `<div class="bkp"><span>🆕 ${t('newVersion')}: ${esc(U.update)}</span><button data-act="reload">${t('reload')}</button></div>` : '';
 }
 function backupBanner() {
   return backupDue() ? `<div class="bkp"><span>☁️ ${t('backupDue')}</span><button data-act="backup">${t('backupNow')}</button></div>` : '';
@@ -382,7 +460,7 @@ function renderList() {
 }
 function homeView() {
   return `<div class="top"><h1>${t('app')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
-  ${backupBanner()}<div id="accs"></div>
+  ${updateBanner()}${backupBanner()}<div id="accs"></div>
   ${periodBar()}<div id="sum"></div>
   <div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>
   <div id="list"></div>`;
@@ -445,14 +523,37 @@ function settingsView() {
     <p class="hint">${t('icloudHint')}</p>
     <button class="lnk" data-act="importcsv">📥 ${t('importCsv')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button>
     <button class="lnk" style="color:var(--exp)" data-act="clearall">⚠️ ${t('clearAll')}</button>
-    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}</div>`;
+    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}<p class="hint" style="text-align:center;margin-top:14px">${t('version')} ${VERSION}</p></div>`;
+}
+function loansView() {
+  const ps = loanPeople(), tot = loanTotals(ps);
+  const open = ps.filter(p => p.bal !== 0), done = ps.filter(p => p.bal === 0);
+  const row = p => `<div class="row" data-act="person" data-k="${esc(p.key)}"><div class="ic av">${esc((p.name[0] || '?').toUpperCase())}</div>
+    <div class="mid"><b>${esc(p.name)}</b><small>${esc(dateLabel(p.last))}</small></div>
+    <div class="amt ${p.bal > 0 ? 'income' : p.bal < 0 ? 'expense' : 'tr'}">${p.bal > 0 ? t('toReceive') + ' ' + money(p.bal) : p.bal < 0 ? t('toPay') + ' ' + money(-p.bal) : t('settled')}</div></div>`;
+  return `<div class="top"><h1>${t('loans')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
+  <div class="cards two"><div class="card i"><small>${t('toReceive')}</small><b>${money(tot.recv)}</b></div><div class="card e"><small>${t('toPay')}</small><b>${money(tot.pay)}</b></div></div>
+  <div class="btns" style="margin:0 0 12px"><button class="primary" data-act="newloan">＋ ${t('newLoan')}</button></div>
+  ${open.map(row).join('')}
+  ${done.length ? `<div class="dh"><span>${t('settled')}</span></div>${done.map(row).join('')}` : ''}
+  ${ps.length ? '' : `<div class="empty">${t('noLoans')}</div>`}
+  <p class="hint">${t('loanHint')}</p>`;
+}
+function personSheet(key) {
+  const p = loanPeople().find(o => o.key === key);
+  if (!p) { closeSheet(); return; }
+  const status = p.bal > 0 ? `${esc(p.name)} ${t('owesYou')} <b>${money(p.bal)}</b>` : p.bal < 0 ? `${t('youOwe')} ${esc(p.name)} <b>${money(-p.bal)}</b>` : t('settled');
+  const items = p.items.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.ts || 0) - (a.ts || 0));
+  sheet(`<h3 style="margin-bottom:2px">${esc(p.name)}</h3><p class="hint" style="margin:0 0 10px">${status}</p>
+    <div class="btns" style="margin:0 0 10px">${p.bal ? `<button class="primary" data-act="psettle" data-k="${esc(p.key)}">${p.bal > 0 ? t('receiveMoney') : t('payBack')}</button>` : ''}<button data-act="pnewloan" data-k="${esc(p.key)}">＋ ${t('addEntry')}</button></div>
+    ${items.map(rowHtml).join('')}`);
 }
 function render() {
   applyTheme();
-  const v = U.tab === 'home' ? homeView() : U.tab === 'reports' ? reportsView() : settingsView();
+  const v = U.tab === 'home' ? homeView() : U.tab === 'reports' ? reportsView() : U.tab === 'loans' ? loansView() : settingsView();
   $('#app').innerHTML = v;
   $('#fab').style.display = U.tab === 'settings' ? 'none' : '';
-  $('#tabs').innerHTML = [['home','🏠'],['reports','📊'],['settings','⚙️']].map(([k, e]) => `<button class="${U.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}"><span>${e}</span>${t(k)}</button>`).join('');
+  $('#tabs').innerHTML = [['home','🏠'],['reports','📊'],['loans','🤝'],['settings','⚙️']].map(([k, e]) => `<button class="${U.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}"><span>${e}</span>${t(k)}</button>`).join('');
   if (U.tab === 'home') renderList();
 }
 
@@ -467,21 +568,22 @@ let toastTimer;
 function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200); }
 
 /* ---------- transaction form ---------- */
-function txForm(id) {
+function txForm(id, preset) {
   const ex = id ? P().tx.find(x => x.id === id) : null;
   const ids = P().accounts.map(a => a.id), pick = (id, d) => ids.includes(id) ? id : d;
   const last = pick(S.settings.lastAcc, 'cash');
-  F = ex ? {from:'bank', to:'cash', acc:last, cat:null, note:'', ...ex, amount:String(ex.amount)}
-         : {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:last, from:pick('bank', ids[0]), to:pick('cash', ids[1] || ids[0]), note:''};
-  F.editing = !!ex; renderForm();
+  const dflt = {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:last, from:pick('bank', ids[0]), to:pick('cash', ids[1] || ids[0]), note:'', person:'', ltype:'lend'};
+  F = ex ? {...dflt, ...ex, amount:String(ex.amount)} : {...dflt, ...(preset || {})};
+  F.editing = !!ex; F.origin = U.tab; renderForm();
 }
 function grab() {
   if (!$('#f_amt')) return;
   F.amount = $('#f_amt').value; F.date = $('#f_date').value || F.date; F.note = $('#f_note').value;
   if (F.type === 'transfer') { F.from = $('#f_from').value; F.to = $('#f_to').value; }
+  if (F.type === 'loan' && $('#f_person')) F.person = $('#f_person').value;
 }
 function renderForm() {
-  const isT = F.type === 'transfer';
+  const isT = F.type === 'transfer', isL = F.type === 'loan';
   const cats = P().categories.filter(c => c.type === F.type);
   if (!isT && !cats.find(c => c.id === F.cat)) F.cat = (cats[0] || {}).id;
   const accOpts = sel => P().accounts.map(a => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${accIcon(a.id)} ${esc(accName(a.id))}</option>`).join('');
@@ -490,20 +592,28 @@ function renderForm() {
   const addCatPanel = `<div class="sec" style="margin-top:12px"><h3>${t('addCategory')}</h3>
        <label>${t('name')}<input id="nc_name"></label><label>${t('icon')}<input id="nc_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
        <div class="btns"><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatsave">${t('save')}</button></div></div>`;
+  const accChips = labelKey => `<label>${t(labelKey)}</label>
+       <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
+  const ps = isL ? loanPeople() : [], pb = isL ? ps.find(p => p.key === pkey(F.person)) : null;
+  const pHint = pb && pb.bal ? `<p class="hint">${pb.bal > 0 ? `${esc(pb.name)} ${t('owesYou')} ${money(pb.bal)}` : `${t('youOwe')} ${esc(pb.name)} ${money(-pb.bal)}`}</p>` : '';
+  const loanMid = `<label>${t('person')}<input id="f_person" list="ppl" autocomplete="off" value="${esc(F.person)}"><datalist id="ppl">${ps.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist></label>${pHint}
+       <label>${t('loanWhat')}</label>
+       <div class="chips two">${[['lend','📤'],['borrow','📥'],['receive','✅'],['repay','💸']].map(([k, e]) => `<button class="chip ${F.ltype === k ? 'on' : ''}" data-act="fltype" data-v="${k}"><span class="ic" style="background:#2e86c122">${e}</span><span>${t('lt_' + k)}</span></button>`).join('')}</div>
+       ${accChips(F.ltype === 'borrow' || F.ltype === 'receive' ? 'receivedIn' : 'paidVia')}`;
   const mid = isT
     ? `<label>${t('fromAcc')}<select id="f_from">${accOpts(F.from)}</select></label><label>${t('toAcc')}<select id="f_to">${accOpts(F.to)}</select></label>`
+    : isL ? loanMid
     : F.addingCat ? addCatPanel
     : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}${newCatChip}</div>
-       <label>${F.type === 'income' ? t('receivedIn') : t('paidVia')}</label>
-       <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
-  sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}</div>
+       ${accChips(F.type === 'income' ? 'receivedIn' : 'paidVia')}`;
+  sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}${typeBtn('loan', '🤝 ' + t('loanShort'))}</div>
   ${isT ? `<p class="hint" style="text-align:center;margin:0">${t('transfer')}</p>` : ''}
   <input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}">
   ${mid}
   <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
   <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
   ${F.addingCat ? '' : `<div class="btns fbtns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="fsave">${t('save')}</button></div>`}`);
-  if (F.addingCat) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
+  if (F.addingCat && !isL) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
   else if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
 }
 function saveTx() {
@@ -515,13 +625,21 @@ function saveTx() {
   if (F.type === 'transfer') {
     if (F.from === F.to) { toast(t('sameAcc')); return; }
     rec = {...base, from:F.from, to:F.to};
+  } else if (F.type === 'loan') {
+    const person = (F.person || '').trim();
+    if (!person) { toast(t('personReq')); return; }
+    rec = {...base, person, ltype:F.ltype, acc:F.acc};
+    S.settings.lastAcc = F.acc;
   } else {
     rec = {...base, cat:F.cat, acc:F.acc};
     S.settings.lastAcc = F.acc;
   }
   if (F.editing) { const i = P().tx.findIndex(y => y.id === F.id); P().tx[i] = {id:F.id, ts:P().tx[i].ts, ...rec}; }
   else P().tx.push({id:uid(), ts:Date.now(), ...rec});
-  save(); closeSheet(); U.tab = 'home'; render(); window.scrollTo(0, 0);
+  save(); closeSheet();
+  ensureVisible(F.date); U.q = ''; U.searching = false;   // make sure the new entry is on screen
+  U.tab = (F.type === 'loan' && F.origin === 'loans') ? 'loans' : 'home';
+  render(); window.scrollTo(0, 0);
 }
 
 /* ---------- export / import ---------- */
@@ -530,6 +648,7 @@ function csvOf(list) {
   const rows = [['Date','Type','Category','Account','Amount','Note']];
   list.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(x => {
     if (x.type === 'transfer') rows.push([x.date, 'transfer', '', accName(x.from) + ' -> ' + accName(x.to), x.amount, x.note || '']);
+    else if (x.type === 'loan') rows.push([x.date, 'loan ' + x.ltype, x.person || '', accName(x.acc), x.amount, x.note || '']);
     else rows.push([x.date, x.type, cat(x.cat).name, accName(x.acc), x.amount, x.note || '']);
   });
   return '\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
@@ -544,7 +663,7 @@ async function shareFile(name, mime, text) {
   return true;
 }
 function printReport() {
-  const list = inRange().filter(x => x.type !== 'transfer').sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
+  const list = inRange().filter(x => x.type === 'income' || x.type === 'expense').sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
   list.filter(x => x.type === 'expense').forEach(x => m[x.cat] = (m[x.cat] || 0) + x.amount);
   const rows = Object.entries(m).sort((a, b) => b[1] - a[1]);
   $('#print').innerHTML = `<h2>${t('pdfTitle')}</h2><div>${esc(profName())} · ${esc(periodText())}</div>
@@ -586,6 +705,7 @@ function rowsToTx(rows) {
   const signed = ci.type < 0 && ci.inc < 0 && amts.some(n => n < 0) && amts.some(n => n > 0);
   body.forEach(r => {
     const date = parseDate(r[ci.date] || ''); if (!date) return;
+    if (ci.type >= 0 && /loan|transfer/i.test(r[ci.type] || '')) return;   // rows we exported ourselves that are not income/expense
     let type = 'expense', amount;
     if (ci.inc >= 0 || ci.exp >= 0) {
       const iv = ci.inc >= 0 ? toNum(r[ci.inc]) : NaN, ev = ci.exp >= 0 ? toNum(r[ci.exp]) : NaN;
@@ -620,7 +740,12 @@ const A = {
   mode: el => { U.mode = el.dataset.v; render(); },
   prev: () => shift(-1), next: () => shift(1),
   tab: el => { U.tab = el.dataset.v; closeSheet(); render(); window.scrollTo(0, 0); },
-  add: () => txForm(), edit: el => txForm(el.dataset.id),
+  add: () => txForm(undefined, U.tab === 'loans' ? {type:'loan'} : undefined), edit: el => txForm(el.dataset.id),
+  newloan: () => txForm(undefined, {type:'loan'}),
+  person: el => personSheet(el.dataset.k),
+  psettle: el => { const p = loanPeople().find(o => o.key === el.dataset.k); if (p) txForm(undefined, {type:'loan', person:p.name, ltype:p.bal > 0 ? 'receive' : 'repay', amount:String(Math.abs(p.bal))}); },
+  pnewloan: el => { const p = loanPeople().find(o => o.key === el.dataset.k); if (p) txForm(undefined, {type:'loan', person:p.name, ltype:'lend'}); },
+  fltype: el => { grab(); F.ltype = el.dataset.v; renderForm(); },
   closeSheet: closeSheet,
   ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; F.addingCat = false; renderForm(); },
   fnewcat: () => { grab(); F.addingCat = true; renderForm(); },
@@ -664,6 +789,13 @@ const A = {
   catdel: el => { if (confirm(t('delConfirm'))) { P().categories = P().categories.filter(c => c.id !== el.dataset.id); save(); render(); } },
   lang: el => { S.settings.lang = el.dataset.v; save(); render(); },
   theme: el => { S.settings.theme = el.dataset.v; save(); render(); },
+  reload: () => {
+    const done = () => location.reload();
+    try {
+      Promise.all([caches.keys().then(ks => Promise.all(ks.map(k => caches.delete(k)))),
+        navigator.serviceWorker.getRegistrations().then(rs => Promise.all(rs.map(r => r.unregister())))]).then(done, done);
+    } catch (e) { done(); }
+  },
   backup: () => shareFile('expenses-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)).then(ok => {
     if (ok) { S.settings.lastBackup = Date.now(); save(); render(); toast(t('saved')); }
   }),
@@ -715,8 +847,29 @@ document.addEventListener('change', e => {
   }
 });
 
+/* ---------- keep the screen current ---------- */
+let todayStr = ymd(new Date());
+// after midnight (or a long time in the background) move a view that was showing "today" to the new today
+function dayRollover() {
+  const n = ymd(new Date());
+  if (n === todayStr) return;
+  if (ymd(U.ref) === todayStr) U.ref = new Date();
+  todayStr = n; render();
+}
+// ask the server which version is published; if it differs from this one, offer a one-tap update
+function checkUpdate() {
+  if (!/^https?:$/.test(location.protocol) || !window.fetch) return;
+  const u = 'index.html?_=' + Date.now();
+  fetch(u, {cache:'no-store'}).then(r => r.ok ? r.text() : '').then(txt => {
+    const m = txt.match(/const VERSION = '([^']+)'/);
+    if (m && m[1] !== VERSION) { U.update = m[1]; render(); }
+  }).catch(() => {}).then(() => { try { caches.open('dte-v1').then(c => c.delete(u)); } catch (e) {} });
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { dayRollover(); checkUpdate(); } });
+
 /* ---------- start ---------- */
 render();
+checkUpdate();
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
