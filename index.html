@@ -148,7 +148,7 @@ const T = {
     bank:'Bank', cash:'Cash', card:'Credit Card', paidVia:'Paid via', receivedIn:'Received in', transfer:'Transfer / Withdraw cash',
     transferShort:'Transfer', withdraw:'Cash withdrawal', fromAcc:'From', toAcc:'To', cashInHand:'Total cash in hand',
     openBal:'Opening balance', sameAcc:'Choose two different accounts',
-    openHint:'Bank and cash: enter what you hold today. Credit card: enter the limit and what you currently owe. Total cash in hand = banks + cash − card dues. Cards show the remaining limit on Home.',
+    openHint:'Bank and cash: enter what you hold today. Credit card: enter the limit and what you currently owe. Cards are loans: spending shows as a minus balance and is not counted in Total cash in hand (banks + cash only). Home also shows each card\'s remaining limit.',
     available:'Available', owed:'Owed', creditLimit:'Credit limit', owedNow:'Currently owed', addBank:'Add bank account', addCard:'Add credit card',
     accUsed:'This account has entries, so it cannot be deleted'
   },
@@ -170,7 +170,7 @@ const T = {
     bank:'ব্যাংক', cash:'ক্যাশ', card:'ক্রেডিট কার্ড', paidVia:'যেভাবে পেমেন্ট করেছেন', receivedIn:'যেখানে পেয়েছেন', transfer:'ট্রান্সফার / ক্যাশ উইথড্র',
     transferShort:'ট্রান্সফার', withdraw:'ক্যাশ উইথড্র', fromAcc:'যেখান থেকে', toAcc:'যেখানে', cashInHand:'মোট ক্যাশ ইন হ্যান্ড',
     openBal:'শুরুর ব্যালেন্স', sameAcc:'দুটো আলাদা অ্যাকাউন্ট বাছুন',
-    openHint:'ব্যাংক ও ক্যাশে এখন যত টাকা আছে তা লিখুন। ক্রেডিট কার্ডে লিমিট আর এখন কত বাকি আছে তা লিখুন। মোট ক্যাশ ইন হ্যান্ড = সব ব্যাংক + ক্যাশ − কার্ডের বাকি। কার্ডের অবশিষ্ট লিমিট হোমে দেখাবে।',
+    openHint:'ব্যাংক ও ক্যাশে এখন যত টাকা আছে তা লিখুন। ক্রেডিট কার্ডে লিমিট আর এখন কত বাকি আছে তা লিখুন। কার্ড হলো লোন: খরচ করলে ব্যালেন্স মাইনাস দেখাবে এবং মোট ক্যাশ ইন হ্যান্ডে ধরা হবে না (শুধু ব্যাংক + ক্যাশ)। হোমে প্রতিটা কার্ডের অবশিষ্ট লিমিটও দেখাবে।',
     available:'অবশিষ্ট লিমিট', owed:'বাকি', creditLimit:'ক্রেডিট লিমিট', owedNow:'এখন বাকি', addBank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', addCard:'ক্রেডিট কার্ড যোগ করুন',
     accUsed:'এই অ্যাকাউন্টে এন্ট্রি আছে, তাই মোছা যাবে না'
   }
@@ -330,12 +330,12 @@ function listHtml(list) {
 }
 function accountsHtml() {
   const b = balances(), accs = P().accounts;
-  // banks + cash, minus what is owed on cards
-  const total = accs.reduce((s, a) => s + (b[a.id] || 0), 0);
+  // cash in hand = banks + cash only; credit cards are loans and are not counted
+  const total = accs.filter(a => a.kind !== 'card').reduce((s, a) => s + (b[a.id] || 0), 0);
   const card = a => {
-    const bal = b[a.id] || 0, owed = Math.max(0, -bal);
-    if (!(a.limit > 0)) return `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(bal)}</b><small>${t('owed')} ${money(owed)}</small></div>`;
-    return `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(a.limit + bal)}</b><small>${t('available')} · ${t('owed')} ${money(owed)}</small></div>`;
+    const bal = b[a.id] || 0;
+    const sub = a.limit > 0 ? `<small>${t('available')}: ${money(a.limit + bal)}</small>` : '';
+    return `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b style="color:${bal < 0 ? 'var(--exp)' : 'inherit'}">${money(bal)}</b>${sub}</div>`;
   };
   return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
   <div class="accs">${accs.map(a => a.kind === 'card' ? card(a) : `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}</div>`;
