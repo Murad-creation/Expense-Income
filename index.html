@@ -94,6 +94,14 @@ h3{margin:0 0 4px}
 .acc small{display:block;color:var(--mut);font-size:12px}
 .acc b{font-size:14px;word-break:break-word}
 .chips.three{grid-template-columns:repeat(3,1fr)}
+label.dpick{position:relative;display:inline-block;margin:0;padding:9px 16px;font-size:16px;font-weight:600;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:12px}
+label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;border:0;font-size:16px}
+.fbtns{position:sticky;bottom:0;background:var(--bg);padding:12px 0 calc(6px + env(safe-area-inset-bottom));margin-top:10px;z-index:2}
+.shead{display:flex;justify-content:flex-end;margin:-4px 0 4px}
+.sx{width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:16px;color:var(--fg)}
+.bkp{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--pri);border-radius:14px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.bkp span{flex:1}
+.bkp button{background:var(--pri);color:var(--priT);border-radius:10px;padding:8px 12px;font-weight:600;white-space:nowrap}
 .amt.tr{color:var(--mut)}
 #print{display:none}
 @media print{
@@ -150,7 +158,10 @@ const T = {
     openBal:'Opening balance', sameAcc:'Choose two different accounts',
     openHint:'Bank and cash: enter what you hold today. Credit card: enter the limit and what you currently owe. Cards are loans: spending shows as a minus balance and is not counted in Total cash in hand (banks + cash only). Home also shows each card\'s remaining limit.',
     available:'Available', owed:'Owed', creditLimit:'Credit limit', owedNow:'Currently owed', addBank:'Add bank account', addCard:'Add credit card',
-    accUsed:'This account has entries, so it cannot be deleted'
+    accUsed:'This account has entries, so it cannot be deleted',
+    newCategory:'New category', close:'Close', backupNow:'Back up now', backupRemind:'Backup reminder', remOff:'Off', remDay:'Every day', remWeek:'Every 7 days', remMonth:'Every 30 days',
+    lastBackup:'Last backup', never:'Never', backupDue:'Time to back up your data to iCloud Drive',
+    icloudHint:'iPhone web apps cannot save to iCloud silently. Tap Back up, then Save to Files and choose iCloud Drive. The app reminds you on your schedule.'
   },
   bn: {
     app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
@@ -172,7 +183,10 @@ const T = {
     openBal:'শুরুর ব্যালেন্স', sameAcc:'দুটো আলাদা অ্যাকাউন্ট বাছুন',
     openHint:'ব্যাংক ও ক্যাশে এখন যত টাকা আছে তা লিখুন। ক্রেডিট কার্ডে লিমিট আর এখন কত বাকি আছে তা লিখুন। কার্ড হলো লোন: খরচ করলে ব্যালেন্স মাইনাস দেখাবে এবং মোট ক্যাশ ইন হ্যান্ডে ধরা হবে না (শুধু ব্যাংক + ক্যাশ)। হোমে প্রতিটা কার্ডের অবশিষ্ট লিমিটও দেখাবে।',
     available:'অবশিষ্ট লিমিট', owed:'বাকি', creditLimit:'ক্রেডিট লিমিট', owedNow:'এখন বাকি', addBank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', addCard:'ক্রেডিট কার্ড যোগ করুন',
-    accUsed:'এই অ্যাকাউন্টে এন্ট্রি আছে, তাই মোছা যাবে না'
+    accUsed:'এই অ্যাকাউন্টে এন্ট্রি আছে, তাই মোছা যাবে না',
+    newCategory:'নতুন ক্যাটাগরি', close:'বন্ধ', backupNow:'এখন ব্যাকআপ নিন', backupRemind:'ব্যাকআপ রিমাইন্ডার', remOff:'বন্ধ', remDay:'প্রতিদিন', remWeek:'প্রতি ৭ দিনে', remMonth:'প্রতি ৩০ দিনে',
+    lastBackup:'শেষ ব্যাকআপ', never:'কখনো না', backupDue:'iCloud Drive-এ ডেটার ব্যাকআপ নেওয়ার সময় হয়েছে',
+    icloudHint:'আইফোনের ওয়েব অ্যাপ নিজে থেকে চুপচাপ iCloud-এ সেভ করতে পারে না। "ব্যাকআপ" চেপে "Save to Files" দিন, তারপর iCloud Drive বেছে নিন। অ্যাপ আপনার ঠিক করা সময় অনুযায়ী মনে করিয়ে দেবে।'
   }
 };
 const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
@@ -193,7 +207,7 @@ function newProfileData() {
 }
 function fresh() {
   const pid = uid();
-  return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'en', cur:'৳'} };
+  return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'en', cur:'৳', firstUse:Date.now(), backupDays:7} };
 }
 const STD = ['bank', 'cash', 'card'];
 const STD_NAME = {bank:'Bank', cash:'Cash', card:'Credit Card'};
@@ -220,6 +234,8 @@ function migrate(s) {
     sortAccounts(d);
   });
   s.settings = s.settings || {theme:'auto', lang:'en', cur:'৳'};
+  if (!s.settings.firstUse) s.settings.firstUse = Date.now();
+  if (s.settings.backupDays === undefined) s.settings.backupDays = 7;
   return s;
 }
 function load() {
@@ -302,7 +318,14 @@ function applyTheme() {
 function periodBar() {
   let h = '<div class="seg">' + ['day','month','year','custom'].map(m => `<button class="${U.mode === m ? 'on' : ''}" data-act="mode" data-v="${m}">${t(m)}</button>`).join('') + '</div>';
   if (U.mode === 'custom') h += `<div class="custom"><label>${t('from')}<input type="date" id="cf" value="${U.from}"></label><label>${t('to')}<input type="date" id="ct" value="${U.to}"></label></div>`;
-  else h += `<div class="nav"><button data-act="prev" aria-label="prev">‹</button><div class="lbl">${esc(label())}</div><button data-act="next" aria-label="next">›</button></div>`;
+  else {
+    // tap the date to open the calendar (day) or month picker (month); the arrows still step one period
+    const r = U.ref;
+    const mid = U.mode === 'day' ? `<label class="dpick">📅 ${esc(label())}<input type="date" id="dp" value="${ymd(r)}"></label>`
+      : U.mode === 'month' ? `<label class="dpick">📅 ${esc(label())}<input type="month" id="mp" value="${r.getFullYear()}-${pad(r.getMonth() + 1)}"></label>`
+      : `<div class="lbl">${esc(label())}</div>`;
+    h += `<div class="nav"><button data-act="prev" aria-label="prev">‹</button>${mid}<button data-act="next" aria-label="next">›</button></div>`;
+  }
   return h;
 }
 function sumHtml(s) {
@@ -340,6 +363,16 @@ function accountsHtml() {
   return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
   <div class="accs">${accs.map(a => a.kind === 'card' ? card(a) : `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}</div>`;
 }
+function backupDue() {
+  const st = S.settings, days = st.backupDays;
+  if (!days) return false;
+  const any = S.profiles.some(p => (S.data[p.id].tx || []).length);
+  if (!any) return false;
+  return (Date.now() - (st.lastBackup || st.firstUse || Date.now())) / 864e5 >= days;
+}
+function backupBanner() {
+  return backupDue() ? `<div class="bkp"><span>☁️ ${t('backupDue')}</span><button data-act="backup">${t('backupNow')}</button></div>` : '';
+}
 function renderList() {
   if (!$('#list')) return;
   const list = txs();
@@ -349,7 +382,7 @@ function renderList() {
 }
 function homeView() {
   return `<div class="top"><h1>${t('app')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
-  <div id="accs"></div>
+  ${backupBanner()}<div id="accs"></div>
   ${periodBar()}<div id="sum"></div>
   <div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>
   <div id="list"></div>`;
@@ -406,7 +439,10 @@ function settingsView() {
     <h3 style="margin-top:10px">${t('theme')}</h3><div class="seg">${['auto','light','dark'].map(x => `<button class="${S.settings.theme === x ? 'on' : ''}" data-act="theme" data-v="${x}">${t(x)}</button>`).join('')}</div>
     <label>${t('currency')}<input id="cur" value="${esc(S.settings.cur)}" maxlength="5"></label></div>
   <div class="sec"><h3>${t('data')}</h3>
-    <button class="lnk" data-act="backup">💾 ${t('backup')}</button><button class="lnk" data-act="restore">♻️ ${t('restore')}</button>
+    <button class="lnk" data-act="backup">☁️ ${t('backup')}</button><button class="lnk" data-act="restore">♻️ ${t('restore')}</button>
+    <label>${t('backupRemind')}<select id="bkd">${[[0,'remOff'],[1,'remDay'],[7,'remWeek'],[30,'remMonth']].map(([v, k]) => `<option value="${v}" ${(+S.settings.backupDays || 0) === v ? 'selected' : ''}>${t(k)}</option>`).join('')}</select></label>
+    <p class="hint">${t('lastBackup')}: ${S.settings.lastBackup ? esc(new Date(S.settings.lastBackup).toLocaleString(loc())) : t('never')}</p>
+    <p class="hint">${t('icloudHint')}</p>
     <button class="lnk" data-act="importcsv">📥 ${t('importCsv')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button>
     <button class="lnk" style="color:var(--exp)" data-act="clearall">⚠️ ${t('clearAll')}</button>
     <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}</div>`;
@@ -421,7 +457,11 @@ function render() {
 }
 
 /* ---------- sheet / toast ---------- */
-function sheet(html) { const s = $('#sheet'); s.innerHTML = `<div class="back" data-act="closeSheet"></div><div class="panel">${html}</div>`; s.classList.add('open'); }
+function sheet(html) {
+  const s = $('#sheet');
+  s.innerHTML = `<div class="back" data-act="closeSheet"></div><div class="panel"><div class="shead"><button class="sx" data-act="closeSheet" aria-label="${t('close')}">✕</button></div>${html}</div>`;
+  s.classList.add('open');
+}
 function closeSheet() { const s = $('#sheet'); s.classList.remove('open'); s.innerHTML = ''; }
 let toastTimer;
 function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2200); }
@@ -446,9 +486,14 @@ function renderForm() {
   if (!isT && !cats.find(c => c.id === F.cat)) F.cat = (cats[0] || {}).id;
   const accOpts = sel => P().accounts.map(a => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${accIcon(a.id)} ${esc(accName(a.id))}</option>`).join('');
   const typeBtn = (k, label) => `<button class="${F.type === k ? 'on' : ''}" data-act="ftype" data-v="${k}">${label}</button>`;
+  const newCatChip = `<button class="chip" data-act="fnewcat"><span class="ic" style="background:var(--line);color:var(--fg)">＋</span><span>${t('newCategory')}</span></button>`;
+  const addCatPanel = `<div class="sec" style="margin-top:12px"><h3>${t('addCategory')}</h3>
+       <label>${t('name')}<input id="nc_name"></label><label>${t('icon')}<input id="nc_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
+       <div class="btns"><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatsave">${t('save')}</button></div></div>`;
   const mid = isT
     ? `<label>${t('fromAcc')}<select id="f_from">${accOpts(F.from)}</select></label><label>${t('toAcc')}<select id="f_to">${accOpts(F.to)}</select></label>`
-    : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}</div>
+    : F.addingCat ? addCatPanel
+    : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}${newCatChip}</div>
        <label>${F.type === 'income' ? t('receivedIn') : t('paidVia')}</label>
        <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
   sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}</div>
@@ -457,8 +502,9 @@ function renderForm() {
   ${mid}
   <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
   <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
-  <div class="btns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button class="primary" data-act="fsave">${t('save')}</button></div>`);
-  if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
+  ${F.addingCat ? '' : `<div class="btns fbtns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="fsave">${t('save')}</button></div>`}`);
+  if (F.addingCat) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
+  else if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
 }
 function saveTx() {
   grab();
@@ -475,7 +521,7 @@ function saveTx() {
   }
   if (F.editing) { const i = P().tx.findIndex(y => y.id === F.id); P().tx[i] = {id:F.id, ts:P().tx[i].ts, ...rec}; }
   else P().tx.push({id:uid(), ts:Date.now(), ...rec});
-  save(); closeSheet(); render();
+  save(); closeSheet(); U.tab = 'home'; render(); window.scrollTo(0, 0);
 }
 
 /* ---------- export / import ---------- */
@@ -491,10 +537,11 @@ function csvOf(list) {
 async function shareFile(name, mime, text) {
   const file = new File([text], name, {type:mime});
   if (navigator.canShare && navigator.canShare({files:[file]})) {
-    try { await navigator.share({files:[file], title:name}); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.share({files:[file], title:name}); return true; } catch (e) { if (e && e.name === 'AbortError') return false; }
   }
   const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return true;
 }
 function printReport() {
   const list = inRange().filter(x => x.type !== 'transfer').sort((a, b) => a.date.localeCompare(b.date) || (a.ts || 0) - (b.ts || 0)), s = sums(list), m = {};
@@ -575,7 +622,17 @@ const A = {
   tab: el => { U.tab = el.dataset.v; closeSheet(); render(); window.scrollTo(0, 0); },
   add: () => txForm(), edit: el => txForm(el.dataset.id),
   closeSheet: closeSheet,
-  ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; renderForm(); },
+  ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; F.addingCat = false; renderForm(); },
+  fnewcat: () => { grab(); F.addingCat = true; renderForm(); },
+  fcatcancel: () => { grab(); F.addingCat = false; renderForm(); },
+  fcatsave: () => {
+    const n = $('#nc_name').value.trim();
+    if (!n) { toast(t('name')); return; }
+    grab();
+    const c = {id:uid(), name:n, icon:$('#nc_icon').value.trim() || '🏷️', color:$('#nc_color').value || '#4f8cff', type:F.type};
+    P().categories.push(c); save();
+    F.cat = c.id; F.addingCat = false; renderForm();
+  },
   fcat: el => { grab(); F.cat = el.dataset.id; renderForm(); },
   fsave: saveTx,
   fdel: () => { if (confirm(t('delConfirm'))) { P().tx = P().tx.filter(x => x.id !== F.id); save(); closeSheet(); render(); } },
@@ -607,7 +664,9 @@ const A = {
   catdel: el => { if (confirm(t('delConfirm'))) { P().categories = P().categories.filter(c => c.id !== el.dataset.id); save(); render(); } },
   lang: el => { S.settings.lang = el.dataset.v; save(); render(); },
   theme: el => { S.settings.theme = el.dataset.v; save(); render(); },
-  backup: () => shareFile('expenses-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)),
+  backup: () => shareFile('expenses-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)).then(ok => {
+    if (ok) { S.settings.lastBackup = Date.now(); save(); render(); toast(t('saved')); }
+  }),
   restore: () => $('#fRestore').click(),
   importcsv: () => $('#fCsv').click(),
   exportcsv: () => shareFile('expenses-' + range()[0] + '_' + range()[1] + '.csv', 'text/csv', csvOf(U.tab === 'settings' ? P().tx : inRange())),
@@ -621,6 +680,9 @@ document.addEventListener('input', e => {
 document.addEventListener('change', e => {
   const id = e.target.id;
   const ds = e.target.dataset || {};
+  if (id === 'dp') { if (e.target.value) { U.ref = parseYmd(e.target.value); render(); } return; }
+  if (id === 'mp') { const m = String(e.target.value).match(/^(\d{4})-(\d{2})/); if (m) { U.ref = new Date(+m[1], +m[2] - 1, 1); render(); } return; }
+  if (id === 'bkd') { S.settings.backupDays = +e.target.value; save(); toast(t('saved')); return; }
   if (ds.open || ds.owed || ds.limit || ds.aname) {
     const a = P().accounts.find(k => k.id === (ds.open || ds.owed || ds.limit || ds.aname));
     const v = toNum(e.target.value), n = isNaN(v) ? 0 : Math.round(v * 100) / 100;
