@@ -107,12 +107,54 @@ label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padd
 .chips.two{grid-template-columns:repeat(2,1fr)}
 .chips.two .chip{flex-direction:row;justify-content:flex-start;gap:8px;padding:8px 10px;font-size:13px}
 .day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 6px;margin-bottom:12px}
-.dayh{font-weight:700;margin-bottom:8px}
-.dsum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
-.dsum>div{background:var(--bg);border-radius:10px;padding:6px 8px;min-width:0}
-.dsum small{display:block;color:var(--mut);font-size:11px}
-.dsum b{font-size:13px;word-break:break-word}
-.dsum .i b{color:var(--inc)}.dsum .e b{color:var(--exp)}
+.dayh{font-weight:700;margin-bottom:6px;text-align:center}
+.dcols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dcol{min-width:0}
+.dct{color:var(--pri);font-weight:700;text-align:center;font-size:14px;margin-bottom:2px}
+.cr{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px;cursor:pointer}
+.cr .cn{flex:1;min-width:0}
+.cr .cname{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cr small{display:block;color:var(--mut);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ca{white-space:nowrap;font-variant-numeric:tabular-nums}
+.dctot{text-align:right;font-weight:700;padding:5px 0 2px;font-size:14px;font-variant-numeric:tabular-nums}
+.dcol.i .dctot{color:var(--inc)}.dcol.e .dctot{color:var(--exp)}
+.dbal{text-align:right;font-weight:600;border-top:1px solid var(--line);margin-top:8px;padding:8px 2px 6px}
+.tot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0 12px;font-size:14px}
+.tot{font-size:13.5px}
+.tot .r2{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap}
+.tot .r2 span{white-space:nowrap}
+.tot .r1{text-align:right;margin-top:4px}
+.tot .inc{color:var(--inc)}.tot .exp{color:var(--exp)}
+.ytab{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ytab th{color:var(--pri);font-weight:600;font-size:13px;text-align:right;padding:6px 4px}
+.ytab th:first-child,.ytab td:first-child{text-align:left}
+.ytab td{padding:10px 4px;border-top:1px solid var(--line);text-align:right;font-size:14px}
+.ytab tr.m{cursor:pointer}
+.ytab td.z{color:var(--mut)}
+.ytab tr.t td{font-weight:700;color:var(--pri);font-size:13px;border-top:2px solid var(--line)}
+.ipick{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:4px}
+.ipcur{font-size:30px;text-align:center;padding:2px 0 6px}
+.igrid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-height:176px;overflow:auto;-webkit-overflow-scrolling:touch}
+.ig{font-size:22px;line-height:1;padding:7px 0;border-radius:10px;border:2px solid transparent;background:transparent}
+.ig.on{border-color:var(--pri);background:var(--bg)}
+.amtrow{display:flex;gap:8px;align-items:center}
+.amtrow .big{flex:1;min-width:0}
+.calcbtn{width:52px;height:52px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-size:24px;flex:none}
+.calcbtn.on{border-color:var(--pri);background:var(--bg)}
+.calc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:6px}
+.cdisp{text-align:right;padding:4px 8px 8px;min-height:58px;overflow:hidden}
+#calc_disp{font-size:26px;font-weight:600;word-break:break-all}
+#calc_res{color:var(--mut);font-size:14px;min-height:18px}
+.ckeys{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ckeys button{padding:13px 0;border-radius:12px;background:var(--bg);font-size:20px;border:1px solid var(--line)}
+.ckeys .op{color:var(--pri);font-weight:700}
+.ckeys .use{grid-column:span 2;background:var(--pri);color:var(--priT);border-color:var(--pri);font-weight:700;font-size:17px}
+.cardrow{padding:10px 0;border-top:1px solid var(--line)}
+.cardrow:first-of-type{border-top:0}
+.cardrow .kv{display:flex;justify-content:space-between;font-size:14px;padding:2px 0}
+.bar{height:8px;border-radius:6px;background:var(--line);overflow:hidden;margin:6px 0}
+.bar>i{display:block;height:100%;background:var(--pri)}
+.bar.hi>i{background:var(--exp)}
 .dsec{margin-top:8px}
 .dst{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:var(--mut);padding:6px 2px 2px}
 .dst.i b{color:var(--inc)}.dst.e b{color:var(--exp)}
@@ -152,7 +194,38 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
-const VERSION = '2.1';
+const VERSION = '2.2';
+
+// icon pack for categories
+const ICONS = ['🍽️','🍔','🍕','🍜','🍚','🍗','🥗','🍎','🥦','🥛','☕','🍰','🥤','🍦','🍫','🍬',
+  '🛒','🛍️','👕','👟','👜','💄','🎁','🧴','🏠','🏡','🛏️','🪑','💡','🔌','💧','🔥',
+  '📱','💻','📶','📞','🚌','🚗','🛵','🚲','⛽','🚕','✈️','🚆','🏥','💊','🩺','🦷',
+  '🏋️','⚽','🎬','🎮','🎵','🎉','🎂','🏖️','📚','🎓','✏️','🧸','👶','🍼','🐶','🐱',
+  '💈','🧹','🧺','🚿','🔧','🛠️','🏦','💳','💰','💵','🪙','💼','🏪','📈','🧾','📦',
+  '🏷️','❤️','🤝','🕌','🙏','🌴','🌱','☂️','🛡️','⭐','🔔','📅','🧧','🚖'];
+function iconPicker(id, cur) {
+  return `<label>${t('icon')}</label><div class="ipick"><input type="hidden" id="${id}" value="${esc(cur)}"><div class="ipcur" id="${id}_cur">${esc(cur)}</div>
+    <div class="igrid">${ICONS.map(i => `<button type="button" class="ig ${i === cur ? 'on' : ''}" data-act="ipSet" data-for="${id}" data-v="${i}">${i}</button>`).join('')}</div></div>`;
+}
+const fmt2 = n => Number(n).toLocaleString(loc(), {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// basic calculator: + - × ÷ with the usual order of operations; returns NaN for an incomplete or invalid sum
+function calcEval(s) {
+  const tk = String(s).match(/\d+(?:\.\d*)?|\.\d+|[+\-*/]/g) || [];
+  if (tk[0] === '-') tk.unshift('0');
+  while (tk.length && /^[+\-*/]$/.test(tk[tk.length - 1])) tk.pop();
+  if (!tk.length) return NaN;
+  const out = [tk[0]];
+  for (let i = 1; i < tk.length; i += 2) {
+    const op = tk[i], r = parseFloat(tk[i + 1]);
+    if (op === '*' || op === '/') { const l = parseFloat(out.pop()); out.push(String(op === '*' ? l * r : (r === 0 ? NaN : l / r))); }
+    else out.push(op, tk[i + 1]);
+  }
+  let acc = parseFloat(out[0]);
+  for (let i = 1; i < out.length; i += 2) acc = out[i] === '+' ? acc + parseFloat(out[i + 1]) : acc - parseFloat(out[i + 1]);
+  return isFinite(acc) ? Math.round(acc * 100) / 100 : NaN;
+}
+const calcShow = s => String(s).replace(/\*/g, '×').replace(/\//g, '÷').replace(/-/g, '−');
 
 /* ---------- translations ---------- */
 const T = {
@@ -187,7 +260,9 @@ const T = {
     receiveMoney:'Money received', payBack:'I paid back', addEntry:'New entry',
     loanLent:'Lent to', loanBorrowed:'Borrowed from', loanReceived:'Received from', loanPaid:'Paid back to',
     loanHint:'Lending takes money out of the account you pick, so Total cash in hand goes down. Borrowing adds it. Receiving or paying back adjusts the same account the same way.',
-    newVersion:'New version available', reload:'Update now'
+    newVersion:'New version available', reload:'Update now',
+    totalIncome:'Total income', totalExpense:'Total expense', creditCards:'Credit cards', limitLbl:'Limit', usedLbl:'Used', payBill:'Pay bill', useIt:'Use',
+    calcTitle:'Calculator', cardsTotal:'All cards', noCards:'No credit card yet. Add one in Settings.'
   },
   bn: {
     app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
@@ -220,7 +295,9 @@ const T = {
     receiveMoney:'টাকা পেয়েছি', payBack:'টাকা ফেরত দিয়েছি', addEntry:'নতুন এন্ট্রি',
     loanLent:'ধার দিয়েছি', loanBorrowed:'ধার নিয়েছি', loanReceived:'ফেরত পেয়েছি', loanPaid:'ফেরত দিয়েছি',
     loanHint:'ধার দিলে যে অ্যাকাউন্ট বাছবেন তা থেকে টাকা কমবে, তাই মোট ক্যাশ ইন হ্যান্ডও কমবে। ধার নিলে বাড়বে। টাকা ফেরত পেলে বা দিলে একই অ্যাকাউন্টে একই নিয়মে সমন্বয় হবে।',
-    newVersion:'নতুন ভার্সন এসেছে', reload:'এখনই আপডেট করুন'
+    newVersion:'নতুন ভার্সন এসেছে', reload:'এখনই আপডেট করুন',
+    totalIncome:'মোট আয়', totalExpense:'মোট খরচ', creditCards:'ক্রেডিট কার্ড', limitLbl:'লিমিট', usedLbl:'ব্যবহৃত', payBill:'বিল পরিশোধ', useIt:'ব্যবহার করুন',
+    calcTitle:'ক্যালকুলেটর', cardsTotal:'সব কার্ড', noCards:'এখনো কোনো ক্রেডিট কার্ড নেই। Settings থেকে যোগ করুন।'
   }
 };
 const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
@@ -387,6 +464,11 @@ function periodBar() {
   }
   return h;
 }
+// compact period summary for the monthly / custom view (total income, total expense, balance - each shown once)
+function totBox(s) {
+  return `<div class="tot"><div class="r2"><span>${t('totalIncome')} = <b class="inc">${money(s.i)}</b></span><span>${t('totalExpense')} = <b class="exp">${money(s.e)}</b></span></div>
+    <div class="r1">${t('balance')} = <b style="color:${s.b < 0 ? 'var(--exp)' : 'inherit'}">${money(s.b)}</b></div></div>`;
+}
 function sumHtml(s) {
   return `<div class="cards"><div class="card i"><small>${t('income')}</small><b>${money(s.i)}</b></div><div class="card e"><small>${t('expense')}</small><b>${money(s.e)}</b></div><div class="card"><small>${t('balance')}</small><b>${money(s.b)}</b></div></div>`;
 }
@@ -408,35 +490,72 @@ function rowHtml(x) {
       <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${accIcon(x.acc)} ${esc(accName(x.acc))}</small></div>
       <div class="amt ${x.type}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</div></div>`;
 }
-// one card per day: that day's income, expense and balance, then income details and expense details
+// monthly / daily view: one card per day, laid out like the original app.
+// Income on the left, expense on the right, each with its own total, then that day's balance (shown once).
+const crHtml = x => { const c = cat(x.cat); return `<div class="cr" data-act="edit" data-id="${x.id}"><span class="cn"><span class="cname">${esc(c.icon)} ${esc(catName(c))}</span><small>${accIcon(x.acc)} ${esc(x.note || accName(x.acc))}</small></span><span class="ca">${fmt2(x.amount)}</span></div>`; };
+function dayCard(date, items) {
+  const s = sums(items), part = f => items.filter(f);
+  const inc = part(x => x.type === 'income'), exp = part(x => x.type === 'expense'), oth = part(x => x.type === 'transfer' || x.type === 'loan');
+  const col = (arr, total, cls) => `<div class="dcol ${cls}"><div class="dct">${t(cls === 'i' ? 'income' : 'expense')}</div>${arr.map(crHtml).join('')}<div class="dctot">${fmt2(total)}</div></div>`;
+  return `<div class="day"><div class="dayh">${esc(dateLabel(date))}</div>
+    <div class="dcols">${col(inc, s.i, 'i')}${col(exp, s.e, 'e')}</div>
+    ${oth.length ? `<div class="dsec"><div class="dst"><span>${t('otherDetails')}</span></div>${oth.map(rowHtml).join('')}</div>` : ''}
+    <div class="dbal">${t('balance')} = <b style="color:${s.b < 0 ? 'var(--exp)' : 'inherit'}">${money(s.b)}</b></div></div>`;
+}
 function listHtml(list) {
   if (!list.length) return `<div class="empty">${t('noTx')}</div>`;
   const days = [], by = {};
   list.forEach(x => { if (!by[x.date]) { by[x.date] = {date:x.date, items:[]}; days.push(by[x.date]); } by[x.date].items.push(x); });
-  return days.map(d => {
-    const s = sums(d.items), part = f => d.items.filter(f);
-    const inc = part(x => x.type === 'income'), exp = part(x => x.type === 'expense'), oth = part(x => x.type === 'transfer' || x.type === 'loan');
-    const sec = (title, arr, total, cls) => arr.length ? `<div class="dsec"><div class="dst ${cls}"><span>${title}</span>${total === null ? '' : `<b>${money(total)}</b>`}</div>${arr.map(rowHtml).join('')}</div>` : '';
-    return `<div class="day"><div class="dayh">${esc(dateLabel(d.date))}</div>
-      <div class="dsum"><div class="i"><small>${t('income')}</small><b>${money(s.i)}</b></div><div class="e"><small>${t('expense')}</small><b>${money(s.e)}</b></div><div class="b"><small>${t('balance')}</small><b style="color:${s.b < 0 ? 'var(--exp)' : 'inherit'}">${money(s.b)}</b></div></div>
-      ${sec(t('incomeDetails'), inc, s.i, 'i')}${sec(t('expenseDetails'), exp, s.e, 'e')}${sec(t('otherDetails'), oth, null, '')}</div>`;
-  }).join('');
+  return days.map(d => dayCard(d.date, d.items)).join('');
+}
+// yearly view: one row per month (income, expense, balance) and the year's totals, like the original app
+function yearHtml() {
+  const y = U.ref.getFullYear(), m = Array.from({length:12}, () => ({i:0, e:0}));
+  P().tx.forEach(x => { if (x.date.slice(0, 4) === String(y)) { const k = +x.date.slice(5, 7) - 1; if (x.type === 'income') m[k].i += x.amount; else if (x.type === 'expense') m[k].e += x.amount; } });
+  const tot = m.reduce((a, r) => ({i:a.i + r.i, e:a.e + r.e}), {i:0, e:0});
+  const cell = v => `<td class="${v === 0 ? 'z' : ''}">${fmt2(v)}</td>`;
+  const bal = v => `<td style="color:${v < 0 ? 'var(--exp)' : v > 0 ? 'var(--inc)' : 'var(--mut)'}">${fmt2(v)}</td>`;
+  const cur = S.settings.cur;
+  return `<div class="sec" style="padding:6px 10px"><table class="ytab"><tr><th></th><th>${t('income')}</th><th>${t('expense')}</th><th>${t('balance')}</th></tr>
+    ${m.map((r, k) => `<tr class="m" data-act="gomonth" data-m="${k}"><td>${esc(new Date(y, k, 1).toLocaleDateString(loc(), {month:'short'}))}</td>${cell(r.i)}${cell(r.e)}${bal(r.i - r.e)}</tr>`).join('')}
+    <tr class="t"><td></td><td>${cur} ${fmt2(tot.i)}</td><td>${cur} ${fmt2(tot.e)}</td><td>${cur} ${fmt2(tot.i - tot.e)}</td></tr></table></div>`;
 }
 function loanBox() {
   const tot = loanTotals();
   return `<div class="acc" data-act="tab" data-v="loans" style="cursor:pointer"><small>🤝 ${t('loanTab')}</small><b style="color:var(--inc)">${t('toReceive')}: ${money(tot.recv)}</b><small style="color:var(--exp)">${t('toPay')}: ${money(tot.pay)}</small></div>`;
 }
+// all credit cards together: total balance (minus = used), total limit, total still available
+function cardTotals() {
+  const b = balances(), cards = P().accounts.filter(a => a.kind === 'card');
+  let bal = 0, limit = 0, avail = 0;
+  cards.forEach(a => { const v = b[a.id] || 0; bal += v; if (a.limit > 0) { limit += a.limit; avail += a.limit + v; } });
+  return {cards, bal, limit, avail, b};
+}
+function cardsBox() {
+  const c = cardTotals();
+  if (!c.cards.length) return '';
+  return `<div class="acc" data-act="cards" style="cursor:pointer"><small>💳 ${t('creditCards')}${c.cards.length > 1 ? ' (' + c.cards.length + ')' : ''} ›</small><b style="color:${c.bal < 0 ? 'var(--exp)' : 'inherit'}">${money(c.bal)}</b>${c.limit > 0 ? `<small>${t('limitLbl')}: ${money(c.limit)}</small><small>${t('available')}: ${money(c.avail)}</small>` : ''}</div>`;
+}
+// tap the credit card box on Home: every card on its own, with a Pay bill shortcut
+function cardsSheet() {
+  const c = cardTotals();
+  const row = a => {
+    const v = c.b[a.id] || 0, used = Math.max(0, -v), lim = a.limit || 0, pct = lim > 0 ? Math.min(100, used / lim * 100) : 0;
+    return `<div class="cardrow"><div class="kv"><b>💳 ${esc(accName(a.id))}</b><b style="color:${v < 0 ? 'var(--exp)' : 'inherit'}">${money(v)}</b></div>
+      ${lim > 0 ? `<div class="bar ${pct >= 80 ? 'hi' : ''}"><i style="width:${pct.toFixed(1)}%"></i></div><div class="kv"><span>${t('limitLbl')}</span><span>${money(lim)}</span></div><div class="kv"><span>${t('available')}</span><span>${money(lim + v)}</span></div>` : ''}
+      <div class="kv"><span>${t('usedLbl')}</span><span>${money(used)}</span></div>
+      <button class="lnk" data-act="paybill" data-id="${a.id}">💸 ${t('payBill')}</button></div>`;
+  };
+  sheet(`<h3>${t('creditCards')}</h3>
+    ${c.cards.length ? `<div class="sec" style="margin-top:6px"><h3>${t('cardsTotal')}</h3><div class="kv" style="display:flex;justify-content:space-between"><span>${t('usedLbl')}</span><b style="color:var(--exp)">${money(Math.max(0, -c.bal))}</b></div>${c.limit > 0 ? `<div class="kv" style="display:flex;justify-content:space-between"><span>${t('limitLbl')}</span><b>${money(c.limit)}</b></div><div class="kv" style="display:flex;justify-content:space-between"><span>${t('available')}</span><b>${money(c.avail)}</b></div>` : ''}</div>` : ''}
+    ${c.cards.map(row).join('') || `<p class="hint">${t('noCards')}</p>`}`);
+}
 function accountsHtml() {
   const b = balances(), accs = P().accounts;
   // cash in hand = banks + cash only; credit cards are loans and are not counted
   const total = accs.filter(a => a.kind !== 'card').reduce((s, a) => s + (b[a.id] || 0), 0);
-  const card = a => {
-    const bal = b[a.id] || 0;
-    const sub = a.limit > 0 ? `<small>${t('available')}: ${money(a.limit + bal)}</small>` : '';
-    return `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b style="color:${bal < 0 ? 'var(--exp)' : 'inherit'}">${money(bal)}</b>${sub}</div>`;
-  };
   return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
-  <div class="accs">${accs.map(a => a.kind === 'card' ? card(a) : `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}${loanBox()}</div>`;
+  <div class="accs">${accs.filter(a => a.kind !== 'card').map(a => `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}${cardsBox()}${loanBox()}</div>`;
 }
 function backupDue() {
   const st = S.settings, days = st.backupDays;
@@ -453,16 +572,18 @@ function backupBanner() {
 }
 function renderList() {
   if (!$('#list')) return;
-  const list = txs();
   $('#accs').innerHTML = accountsHtml();
-  $('#sum').innerHTML = sumHtml(sums(list));
+  if (U.mode === 'year') { $('#list').innerHTML = yearHtml(); return; }
+  const list = txs();
+  if ($('#sum')) $('#sum').innerHTML = totBox(sums(list));   // the daily view has no top summary: its day card already shows the totals
   $('#list').innerHTML = listHtml(list);
 }
 function homeView() {
+  const yr = U.mode === 'year';
   return `<div class="top"><h1>${t('app')}</h1><button class="pill" data-act="profileMenu">${esc(profName())} ▾</button></div>
   ${updateBanner()}${backupBanner()}<div id="accs"></div>
-  ${periodBar()}<div id="sum"></div>
-  <div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>
+  ${periodBar()}${U.mode === 'day' || yr ? '' : '<div id="sum"></div>'}
+  ${yr ? '' : `<div class="srch">${U.searching ? `<input id="q" placeholder="${esc(t('search'))}" value="${esc(U.q)}">` : '<div style="flex:1"></div>'}<button class="ico" data-act="search">${U.searching ? '✕' : '🔍'}</button></div>`}
   <div id="list"></div>`;
 }
 function pie(items, total) {
@@ -492,7 +613,6 @@ function reportsView() {
 }
 function settingsView() {
   const p = P();
-  const catList = type => p.categories.filter(c => c.type === type).map(c => `<div class="li"><span class="dot" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span class="n">${esc(catName(c))}</span><button class="x" data-act="catdel" data-id="${c.id}">✕</button></div>`).join('');
   const standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
   return `<div class="top"><h1>${t('settings')}</h1></div>
   <div class="sec"><h3>${t('profiles')}</h3>
@@ -511,8 +631,6 @@ function settingsView() {
     }).join('')}
     <button class="lnk" data-act="accadd" data-v="bank">＋ ${t('addBank')}</button><button class="lnk" data-act="accadd" data-v="card">＋ ${t('addCard')}</button>
     <p class="hint">${t('openHint')}</p></div>
-  <div class="sec"><h3>${t('typeExp')}</h3>${catList('expense')}<button class="lnk" data-act="catadd" data-v="expense">＋ ${t('addCategory')}</button></div>
-  <div class="sec"><h3>${t('typeInc')}</h3>${catList('income')}<button class="lnk" data-act="catadd" data-v="income">＋ ${t('addCategory')}</button></div>
   <div class="sec"><h3>${t('language')}</h3><div class="seg"><button class="${S.settings.lang === 'en' ? 'on' : ''}" data-act="lang" data-v="en">English</button><button class="${S.settings.lang === 'bn' ? 'on' : ''}" data-act="lang" data-v="bn">বাংলা</button></div>
     <h3 style="margin-top:10px">${t('theme')}</h3><div class="seg">${['auto','light','dark'].map(x => `<button class="${S.settings.theme === x ? 'on' : ''}" data-act="theme" data-v="${x}">${t(x)}</button>`).join('')}</div>
     <label>${t('currency')}<input id="cur" value="${esc(S.settings.cur)}" maxlength="5"></label></div>
@@ -590,7 +708,7 @@ function renderForm() {
   const typeBtn = (k, label) => `<button class="${F.type === k ? 'on' : ''}" data-act="ftype" data-v="${k}">${label}</button>`;
   const newCatChip = `<button class="chip" data-act="fnewcat"><span class="ic" style="background:var(--line);color:var(--fg)">＋</span><span>${t('newCategory')}</span></button>`;
   const addCatPanel = `<div class="sec" style="margin-top:12px"><h3>${t('addCategory')}</h3>
-       <label>${t('name')}<input id="nc_name"></label><label>${t('icon')}<input id="nc_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
+       <label>${t('name')}<input id="nc_name"></label>${iconPicker('nc_icon', '🏷️')}<label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
        <div class="btns"><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatsave">${t('save')}</button></div></div>`;
   const accChips = labelKey => `<label>${t(labelKey)}</label>
        <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
@@ -606,15 +724,24 @@ function renderForm() {
     : F.addingCat ? addCatPanel
     : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}${newCatChip}</div>
        ${accChips(F.type === 'income' ? 'receivedIn' : 'paidVia')}`;
+  const keys = [['C','C','op'],['back','⌫','op'],['/','÷','op'],['*','×','op'],['7'],['8'],['9'],['-','−','op'],['4'],['5'],['6'],['+','+','op'],['1'],['2'],['3'],['=','=','op'],['0'],['.']]
+    .map(([k, l, c]) => `<button type="button" class="${c || ''}" data-act="ck" data-k="${k}">${l || k}</button>`).join('') + `<button type="button" class="use" data-act="ck" data-k="ok">✓ ${t('useIt')}</button>`;
+  const calcPanel = F.calcOpen ? `<div class="calc"><div class="cdisp"><div id="calc_disp">${esc(calcShow(F.calc || '') || '0')}</div><div id="calc_res">${calcRes()}</div></div><div class="ckeys">${keys}</div></div>` : '';
   sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}${typeBtn('loan', '🤝 ' + t('loanShort'))}</div>
   ${isT ? `<p class="hint" style="text-align:center;margin:0">${t('transfer')}</p>` : ''}
-  <input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}">
+  <div class="amtrow"><input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}"><button type="button" class="calcbtn ${F.calcOpen ? 'on' : ''}" data-act="calc" aria-label="${t('calcTitle')}">🧮</button></div>
+  ${calcPanel}
   ${mid}
   <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
   <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
   ${F.addingCat ? '' : `<div class="btns fbtns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="fsave">${t('save')}</button></div>`}`);
   if (F.addingCat && !isL) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
-  else if (!F.editing && !F.amount) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
+  else if (!F.editing && !F.amount && !F.calcOpen) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
+}
+// preview of the running calculator result, shown under the expression
+function calcRes() {
+  const s = F.calc || '', v = calcEval(s);
+  return (/[+\-*/]/.test(s.slice(1)) && isFinite(v)) ? '= ' + fmt2(v) : '';
 }
 function saveTx() {
   grab();
@@ -783,10 +910,39 @@ const A = {
     if (d.tx.some(x => x.acc === id || x.from === id || x.to === id)) { toast(t('accUsed')); return; }
     if (confirm(t('delConfirm'))) { d.accounts = d.accounts.filter(a => a.id !== id); save(); render(); }
   },
-  catadd: el => sheet(`<h3>${t('addCategory')}</h3><label>${t('name')}<input id="c_name"></label><label>${t('icon')}<input id="c_icon" value="🏷️" maxlength="4"></label><label>${t('color')}<input type="color" id="c_color" value="#4f8cff"></label>
-    <div class="btns"><button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="csave" data-v="${el.dataset.v}">${t('save')}</button></div>`),
-  csave: el => { const n = $('#c_name').value.trim(); if (!n) return; P().categories.push({id:uid(), name:n, icon:$('#c_icon').value || '🏷️', color:$('#c_color').value, type:el.dataset.v}); save(); closeSheet(); render(); },
-  catdel: el => { if (confirm(t('delConfirm'))) { P().categories = P().categories.filter(c => c.id !== el.dataset.id); save(); render(); } },
+  ipSet: el => {
+    const id = el.dataset.for, i = $('#' + id), cur = $('#' + id + '_cur');
+    if (i) i.value = el.dataset.v;
+    if (cur) cur.textContent = el.dataset.v;
+    const sib = el.parentNode && el.parentNode.querySelectorAll ? el.parentNode.querySelectorAll('.ig') : [];
+    sib.forEach(b => b.classList.toggle('on', b === el));
+  },
+  gomonth: el => { U.mode = 'month'; U.ref = new Date(U.ref.getFullYear(), +el.dataset.m, 1); render(); window.scrollTo(0, 0); },
+  cards: () => cardsSheet(),
+  paybill: el => {
+    const id = el.dataset.id, used = Math.max(0, -(balances()[id] || 0)), accs = P().accounts;
+    const from = (accs.find(a => a.kind === 'bank') || accs.find(a => a.kind === 'cash') || accs[0]).id;
+    txForm(undefined, {type:'transfer', from, to:id, amount:used ? String(used) : ''});
+  },
+  calc: () => { grab(); F.calcOpen = !F.calcOpen; if (F.calcOpen) { const v = toNum(F.amount); F.calc = isFinite(v) && v > 0 ? String(v) : ''; } renderForm(); },
+  ck: el => {
+    const k = el.dataset.k, isOp = c => '+-*/'.includes(c);
+    let s = F.calc || '';
+    if (k === 'C') s = '';
+    else if (k === 'back') s = s.slice(0, -1);
+    else if (k === '=') { const v = calcEval(s); if (isFinite(v)) s = String(v); }
+    else if (k === 'ok') {
+      const v = calcEval(s);
+      if (!(v > 0)) { toast(t('badAmount')); return; }
+      grab(); F.amount = String(v); F.calcOpen = false; renderForm(); return;
+    }
+    else if (isOp(k)) { if (!s) { if (k === '-') s = '-'; } else if (isOp(s[s.length - 1])) { if (s.length > 1) s = s.slice(0, -1) + k; } else s += k; }
+    else if (k === '.') { const last = s.split(/[+\-*/]/).pop(); if (!last.includes('.')) s += last === '' ? '0.' : '.'; }
+    else s += k;
+    F.calc = s;
+    $('#calc_disp').textContent = calcShow(s) || '0';
+    $('#calc_res').textContent = calcRes();
+  },
   lang: el => { S.settings.lang = el.dataset.v; save(); render(); },
   theme: el => { S.settings.theme = el.dataset.v; save(); render(); },
   reload: () => {
