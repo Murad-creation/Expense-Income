@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="iNEX">
+<meta name="apple-mobile-web-app-title" content="Expenses">
 <meta name="theme-color" content="#1f7a5c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>iNEX</title>
+<title>Day Expenses</title>
 <style>
 :root{--bg:#f4f6f5;--card:#fff;--fg:#17211d;--mut:#6b7872;--line:#e3e8e5;--pri:#1f7a5c;--priT:#fff;--inc:#1f9d6b;--exp:#d6453d;--shadow:0 2px 10px rgba(0,0,0,.06)}
 @media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1512;--card:#18211d;--fg:#e8efec;--mut:#8fa098;--line:#26322d;--pri:#35b58a;--priT:#06150f;--inc:#3ccb92;--exp:#ff6b60;--shadow:none}}
@@ -94,8 +94,6 @@ h3{margin:0 0 4px}
 .acc small{display:block;color:var(--mut);font-size:12px}
 .acc b{font-size:14px;word-break:break-word}
 .chips.three{grid-template-columns:repeat(3,1fr)}
-.chips.four{grid-template-columns:repeat(4,1fr)}
-.chips.five{grid-template-columns:repeat(5,1fr)}
 label.dpick{position:relative;display:inline-block;margin:0;padding:9px 16px;font-size:16px;font-weight:600;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:12px}
 label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;border:0;font-size:16px}
 .fbtns{position:sticky;bottom:0;background:var(--bg);padding:12px 0 calc(6px + env(safe-area-inset-bottom));margin-top:10px;z-index:2}
@@ -121,7 +119,8 @@ label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padd
 .dctot{text-align:right;font-weight:700;padding:5px 0 2px;font-size:14px;font-variant-numeric:tabular-nums}
 .dcol.i .dctot{color:var(--inc)}.dcol.e .dctot{color:var(--exp)}
 .dbal{text-align:right;font-weight:600;border-top:1px solid var(--line);margin-top:8px;padding:8px 2px 6px}
-.tot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0 12px;font-size:13.5px}
+.tot{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0 12px;font-size:14px}
+.tot{font-size:13.5px}
 .tot .r2{display:flex;justify-content:space-between;gap:4px 12px;flex-wrap:wrap}
 .tot .r2 span{white-space:nowrap}
 .tot .r1{text-align:right;margin-top:4px}
@@ -162,8 +161,6 @@ label.dpick>input{position:absolute;inset:0;width:100%;height:100%;margin:0;padd
 .day .row{border:0;border-top:1px solid var(--line);border-radius:0;background:none;margin:0;padding:10px 2px}
 .day .dst+.row{border-top:0}
 .row .av{background:var(--pri);color:var(--priT);font-weight:700;border-radius:50%}
-.dev-by{font-size:13.5px;font-weight:600;color:var(--pri);text-align:center;margin-top:18px;margin-bottom:4px}
-.acc-picker-box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-top:6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 #print{display:none}
 @media print{
   body>*:not(#print){display:none!important}
@@ -197,31 +194,7 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
-const VERSION = '3.0';
-
-// Predefined Lists for Bangladesh
-const BD_BANKS = [
-  'Sonali Bank', 'Janata Bank', 'Agrani Bank', 'Rupali Bank', 'BRAC Bank', 
-  'Dutch-Bangla Bank (DBBL)', 'Islami Bank Bangladesh', 'City Bank', 'Eastern Bank (EBL)', 
-  'Mutual Trust Bank (MTB)', 'Standard Chartered', 'HSBC Bangladesh', 'Dhaka Bank', 
-  'Prime Bank', 'United Commercial Bank (UCB)', 'Southeast Bank', 'Trust Bank', 
-  'Bank Asia', 'Pubali Bank', 'NCC Bank', 'Jamuna Bank', 'Midland Bank', 
-  'Community Bank', 'Social Islami Bank (SIBL)', 'Al-Arafah Islami Bank', 'First Security Islami Bank',
-  'Meghna Bank', 'Modhumoti Bank', 'NRB Bank', 'NRBC Bank', 'South Bangla Agriculture & Commerce',
-  'Shahjalal Islami Bank', 'EXIM Bank', 'Standard Bank', 'Mercantile Bank', 'Global Islami Bank',
-  'Union Bank', 'Padma Bank', 'Shimanto Bank', 'Other Bank'
-];
-
-const BD_CARDS = [
-  'City Bank Amex Card', 'City Bank Visa/Mastercard', 'EBL Visa/Mastercard', 
-  'DBBL Nexus/Visa/Mastercard', 'BRAC Bank Credit Card', 'Standard Chartered Card', 
-  'MTB Credit Card', 'Dhaka Bank Card', 'Prime Bank Card', 'UCB Credit Card', 
-  'Islami Bank Khidmah Card', 'Trust Bank Card', 'Bank Asia Card', 'Other Credit Card'
-];
-
-const BD_MFS = [
-  'bKash', 'Nagad', 'Rocket', 'Upay', 'CellFin', 'Mcash', 'SureCash', 'Tap', 'OK Wallet', 'TeleCash', 'Other MFS'
-];
+const VERSION = '2.2';
 
 // icon pack for categories
 const ICONS = ['🍽️','🍔','🍕','🍜','🍚','🍗','🥗','🍎','🥦','🥛','☕','🍰','🥤','🍦','🍫','🍬',
@@ -236,7 +209,7 @@ function iconPicker(id, cur) {
 }
 const fmt2 = n => Number(n).toLocaleString(loc(), {minimumFractionDigits:2, maximumFractionDigits:2});
 
-// basic calculator
+// basic calculator: + - × ÷ with the usual order of operations; returns NaN for an incomplete or invalid sum
 function calcEval(s) {
   const tk = String(s).match(/\d+(?:\.\d*)?|\.\d+|[+\-*/]/g) || [];
   if (tk[0] === '-') tk.unshift('0');
@@ -257,7 +230,7 @@ const calcShow = s => String(s).replace(/\*/g, '×').replace(/\//g, '÷').replac
 /* ---------- translations ---------- */
 const T = {
   en: {
-    app:'iNEX', income:'Income', expense:'Expense', balance:'Balance', home:'Home', reports:'Reports', settings:'Settings',
+    app:'Day Expenses', income:'Income', expense:'Expense', balance:'Balance', home:'Home', reports:'Reports', settings:'Settings',
     day:'Daily', month:'Monthly', year:'Yearly', custom:'Custom', from:'From', to:'To', save:'Save', delete:'Delete', cancel:'Cancel',
     amount:'Amount', date:'Date', category:'Category', account:'Account', note:'Note', search:'Search note, category, amount',
     noTx:'No entries in this period', profiles:'Profiles', accounts:'Accounts', categories:'Categories', language:'Language',
@@ -265,41 +238,34 @@ const T = {
     restore:'Restore from backup', exportCsv:'Export Excel / CSV', exportPdf:'Save PDF report', importCsv:'Import CSV',
     clearAll:'Delete all data', newProfile:'New profile', rename:'Rename current', switchTo:'Switch profile', name:'Name', icon:'Icon', color:'Color',
     addCategory:'Add category', addAccount:'Add account', spendingBy:'Expense by category', incomeBy:'Income by category',
-    uncategorized:'Unknown', data:'Data', pdfTitle:'iNEX Income & Expense Report', installHint:'To install: Safari → Share → Add to Home Screen',
+    uncategorized:'Unknown', data:'Data', pdfTitle:'Income & Expense Report', installHint:'To install: Safari → Share → Add to Home Screen',
     clearConfirm:'All data of ALL profiles will be erased. Sure?', restoreConfirm:'This replaces all current data. Continue?',
     badAmount:'Enter a valid amount', delConfirm:'Delete?', saved:'Saved', imported:'entries imported', badFile:'Could not read this file',
     importAsk:'entries found', total:'Total', delProfile:'Delete current profile', profName:'Profile name', accName:'Account name',
     backupHint:'Your data lives only on this phone. Take a backup regularly and keep it in iCloud Drive / Files.',
     lastProfile:'You need at least one profile', typeExp:'Expense category', typeInc:'Income category',
-    bank:'Bank', cash:'Cash', card:'Credit Card', mfs:'MFS', savings:'Savings (DPS / FDR)',
-    paidVia:'Paid via', receivedIn:'Received in', transfer:'Transfer / Withdraw cash',
+    bank:'Bank', cash:'Cash', card:'Credit Card', paidVia:'Paid via', receivedIn:'Received in', transfer:'Transfer / Withdraw cash',
     transferShort:'Transfer', withdraw:'Cash withdrawal', fromAcc:'From', toAcc:'To', cashInHand:'Total cash in hand',
     openBal:'Opening balance', sameAcc:'Choose two different accounts',
-    openHint:'Bank, Cash & MFS: enter current balance. Credit card: enter limit and what you currently owe. Savings: DPS / FDR for future savings.',
-    available:'Available', owed:'Owed', creditLimit:'Credit limit', owedNow:'Currently owed', 
-    addBank:'Add Bank Account', addCard:'Add Credit Card', addMfs:'Add MFS Account', addSavings:'Add Savings (DPS/FDR)',
+    openHint:'Bank and cash: enter what you hold today. Credit card: enter the limit and what you currently owe. Cards are loans: spending shows as a minus balance and is not counted in Total cash in hand (banks + cash only). Home also shows each card\'s remaining limit.',
+    available:'Available', owed:'Owed', creditLimit:'Credit limit', owedNow:'Currently owed', addBank:'Add bank account', addCard:'Add credit card',
     accUsed:'This account has entries, so it cannot be deleted',
     newCategory:'New category', close:'Close', backupNow:'Back up now', backupRemind:'Backup reminder', remOff:'Off', remDay:'Every day', remWeek:'Every 7 days', remMonth:'Every 30 days',
     lastBackup:'Last backup', never:'Never', backupDue:'Time to back up your data to iCloud Drive',
-    icloudHint:'Web apps cannot save to iCloud silently. Tap Back up, then Save to Files and choose iCloud Drive.',
+    icloudHint:'iPhone web apps cannot save to iCloud silently. Tap Back up, then Save to Files and choose iCloud Drive. The app reminds you on your schedule.',
     version:'Version', incomeDetails:'Income details', expenseDetails:'Expense details', otherDetails:'Transfers & loans',
     loans:'Loans', loanTab:'Personal loan', toReceive:'To receive', toPay:'To pay', person:'Person', loanWhat:'What happened', loanShort:'Loan',
     lt_lend:'I lent', lt_borrow:'I borrowed', lt_receive:'Got paid back', lt_repay:'I paid back',
     newLoan:'New loan entry', settled:'Settled', owesYou:'owes you', youOwe:'You owe', personReq:'Enter the person\'s name', noLoans:'No loans yet',
     receiveMoney:'Money received', payBack:'I paid back', addEntry:'New entry',
     loanLent:'Lent to', loanBorrowed:'Borrowed from', loanReceived:'Received from', loanPaid:'Paid back to',
-    loanHint:'Lending takes money out of the chosen account. Borrowing adds it.',
+    loanHint:'Lending takes money out of the account you pick, so Total cash in hand goes down. Borrowing adds it. Receiving or paying back adjusts the same account the same way.',
     newVersion:'New version available', reload:'Update now',
     totalIncome:'Total income', totalExpense:'Total expense', creditCards:'Credit cards', limitLbl:'Limit', usedLbl:'Used', payBill:'Pay bill', useIt:'Use',
-    calcTitle:'Calculator', cardsTotal:'All cards', noCards:'No credit card yet. Add one in Settings.',
-    bankAccounts:'Bank accounts', allBanks:'Total Bank Balance', noBanks:'No bank account added yet.',
-    mfsAccounts:'MFS accounts', allMfs:'Total MFS Balance', noMfs:'No MFS account added yet.',
-    savingsTitle:'Savings (DPS / FDR)', allSavings:'Total Savings', noSavings:'No DPS or FDR added yet.',
-    dps:'DPS', fdr:'FDR', savingsType:'Savings Type', developedBy:'Developed By Amzad H. Murad',
-    selectAccount:'Select Account', customName:'Custom Name (Optional)', selectBank:'Select Bank', selectCard:'Select Card', selectMfs:'Select MFS Provider'
+    calcTitle:'Calculator', cardsTotal:'All cards', noCards:'No credit card yet. Add one in Settings.'
   },
   bn: {
-    app:'iNEX', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
+    app:'দৈনন্দিন খরচ', income:'আয়', expense:'খরচ', balance:'ব্যালেন্স', home:'হোম', reports:'রিপোর্ট', settings:'সেটিংস',
     day:'দৈনিক', month:'মাসিক', year:'বার্ষিক', custom:'কাস্টম', from:'শুরু', to:'শেষ', save:'সংরক্ষণ', delete:'মুছুন', cancel:'বাতিল',
     amount:'পরিমাণ', date:'তারিখ', category:'ক্যাটাগরি', account:'অ্যাকাউন্ট', note:'নোট', search:'নোট, ক্যাটাগরি বা পরিমাণ খুঁজুন',
     noTx:'এই সময়ে কোনো এন্ট্রি নেই', profiles:'প্রোফাইল', accounts:'অ্যাকাউন্ট', categories:'ক্যাটাগরি', language:'ভাষা',
@@ -307,38 +273,31 @@ const T = {
     restore:'ব্যাকআপ থেকে ফেরত আনুন', exportCsv:'Excel / CSV এক্সপোর্ট', exportPdf:'PDF রিপোর্ট সংরক্ষণ', importCsv:'CSV ইমপোর্ট',
     clearAll:'সব ডেটা মুছুন', newProfile:'নতুন প্রোফাইল', rename:'বর্তমান প্রোফাইলের নাম বদলান', switchTo:'প্রোফাইল বদলান', name:'নাম', icon:'আইকন', color:'রঙ',
     addCategory:'নতুন ক্যাটাগরি', addAccount:'নতুন অ্যাকাউন্ট', spendingBy:'ক্যাটাগরি অনুযায়ী খরচ', incomeBy:'ক্যাটাগরি অনুযায়ী আয়',
-    uncategorized:'অজানা', data:'ডেটা', pdfTitle:'iNEX আয়-ব্যয়ের রিপোর্ট', installHint:'ইনস্টল করতে: Safari → Share → Add to Home Screen',
+    uncategorized:'অজানা', data:'ডেটা', pdfTitle:'আয়-ব্যয়ের রিপোর্ট', installHint:'ইনস্টল করতে: Safari → Share → Add to Home Screen',
     clearConfirm:'সব প্রোফাইলের সব ডেটা মুছে যাবে। নিশ্চিত?', restoreConfirm:'বর্তমান সব ডেটা বদলে যাবে। চালিয়ে যাবেন?',
     badAmount:'সঠিক পরিমাণ লিখুন', delConfirm:'মুছে ফেলবেন?', saved:'সংরক্ষিত', imported:'টি এন্ট্রি ইমপোর্ট হয়েছে', badFile:'ফাইলটি পড়া যায়নি',
     importAsk:'টি এন্ট্রি পাওয়া গেছে', total:'মোট', delProfile:'বর্তমান প্রোফাইল মুছুন', profName:'প্রোফাইলের নাম', accName:'অ্যাকাউন্টের নাম',
-    backupHint:'আপনার ডেটা শুধু এই ফোনেই থাকে। নিয়মিত ব্যাকআপ নিয়ে সুরক্ষিত স্থানে রাখুন।',
+    backupHint:'আপনার ডেটা শুধু এই ফোনেই থাকে। নিয়মিত ব্যাকআপ নিয়ে iCloud Drive / Files-এ রাখুন।',
     lastProfile:'অন্তত একটা প্রোফাইল থাকতে হবে', typeExp:'খরচের ক্যাটাগরি', typeInc:'আয়ের ক্যাটাগরি',
-    bank:'ব্যাংক', cash:'ক্যাশ', card:'ক্রেডিট কার্ড', mfs:'এমএফএস (MFS)', savings:'সেভিংস (DPS/FDR)',
-    paidVia:'যেভাবে পেমেন্ট করেছেন', receivedIn:'যেখানে পেয়েছেন', transfer:'ট্রান্সফার / ক্যাশ উইথড্র',
+    bank:'ব্যাংক', cash:'ক্যাশ', card:'ক্রেডিট কার্ড', paidVia:'যেভাবে পেমেন্ট করেছেন', receivedIn:'যেখানে পেয়েছেন', transfer:'ট্রান্সফার / ক্যাশ উইথড্র',
     transferShort:'ট্রান্সফার', withdraw:'ক্যাশ উইথড্র', fromAcc:'যেখান থেকে', toAcc:'যেখানে', cashInHand:'মোট ক্যাশ ইন হ্যান্ড',
-    openBal:'শুরুর ব্যালেন্স (Opening)', sameAcc:'দুটো আলাদা অ্যাকাউন্ট বাছুন',
-    openHint:'ব্যাংক, ক্যাশ ও MFS-এ বর্তমান ব্যালেন্স লিখুন। ক্রেডিট কার্ডে লিমিট এবং ব্যবহৃত ঋণ লিখুন। সেভিংসে DPS বা FDR এর জমানো টাকা লিখুন।',
-    available:'অবশিষ্ট লিমিট', owed:'বাকি', creditLimit:'ক্রেডিট লিমিট', owedNow:'এখন বাকি', 
-    addBank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', addCard:'ক্রেডিট কার্ড যোগ করুন', addMfs:'MFS অ্যাকাউন্ট যোগ করুন', addSavings:'সেভিংস (DPS/FDR) যোগ করুন',
+    openBal:'শুরুর ব্যালেন্স', sameAcc:'দুটো আলাদা অ্যাকাউন্ট বাছুন',
+    openHint:'ব্যাংক ও ক্যাশে এখন যত টাকা আছে তা লিখুন। ক্রেডিট কার্ডে লিমিট আর এখন কত বাকি আছে তা লিখুন। কার্ড হলো লোন: খরচ করলে ব্যালেন্স মাইনাস দেখাবে এবং মোট ক্যাশ ইন হ্যান্ডে ধরা হবে না (শুধু ব্যাংক + ক্যাশ)। হোমে প্রতিটা কার্ডের অবশিষ্ট লিমিটও দেখাবে।',
+    available:'অবশিষ্ট লিমিট', owed:'বাকি', creditLimit:'ক্রেডিট লিমিট', owedNow:'এখন বাকি', addBank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', addCard:'ক্রেডিট কার্ড যোগ করুন',
     accUsed:'এই অ্যাকাউন্টে এন্ট্রি আছে, তাই মোছা যাবে না',
     newCategory:'নতুন ক্যাটাগরি', close:'বন্ধ', backupNow:'এখন ব্যাকআপ নিন', backupRemind:'ব্যাকআপ রিমাইন্ডার', remOff:'বন্ধ', remDay:'প্রতিদিন', remWeek:'প্রতি ৭ দিনে', remMonth:'প্রতি ৩০ দিনে',
-    lastBackup:'শেষ ব্যাকআপ', never:'কখনো না', backupDue:'ডেটার ব্যাকআপ নেওয়ার সময় হয়েছে',
-    icloudHint:'ওয়েব অ্যাপ নিজে ব্যাকআপ সেভ করে না, "ব্যাকআপ" চেপে ফাইলটি ডাউনলোড করে ড্রাইভে সংরক্ষণ করুন।',
+    lastBackup:'শেষ ব্যাকআপ', never:'কখনো না', backupDue:'iCloud Drive-এ ডেটার ব্যাকআপ নেওয়ার সময় হয়েছে',
+    icloudHint:'আইফোনের ওয়েব অ্যাপ নিজে থেকে চুপচাপ iCloud-এ সেভ করতে পারে না। "ব্যাকআপ" চেপে "Save to Files" দিন, তারপর iCloud Drive বেছে নিন। অ্যাপ আপনার ঠিক করা সময় অনুযায়ী মনে করিয়ে দেবে।',
     version:'ভার্সন', incomeDetails:'আয়ের বিবরণ', expenseDetails:'খরচের বিবরণ', otherDetails:'ট্রান্সফার ও লোন',
     loans:'লোন', loanTab:'পার্সোনাল লোন', toReceive:'পাব', toPay:'দেব', person:'ব্যক্তির নাম', loanWhat:'কী হয়েছে', loanShort:'লোন',
     lt_lend:'ধার দিলাম', lt_borrow:'ধার নিলাম', lt_receive:'ফেরত পেলাম', lt_repay:'ফেরত দিলাম',
     newLoan:'নতুন লোন এন্ট্রি', settled:'পরিশোধিত', owesYou:'আপনাকে দেবে', youOwe:'আপনি দেবেন', personReq:'ব্যক্তির নাম লিখুন', noLoans:'এখনো কোনো লোন নেই',
     receiveMoney:'টাকা পেয়েছি', payBack:'টাকা ফেরত দিয়েছি', addEntry:'নতুন এন্ট্রি',
     loanLent:'ধার দিয়েছি', loanBorrowed:'ধার নিয়েছি', loanReceived:'ফেরত পেয়েছি', loanPaid:'ফেরত দিয়েছি',
-    loanHint:'ধার দিলে বা নিলে সংশ্লিষ্ট অ্যাকাউন্টে স্বয়ংক্রিয়ভাবে ব্যালেন্স সমন্বয় হবে।',
+    loanHint:'ধার দিলে যে অ্যাকাউন্ট বাছবেন তা থেকে টাকা কমবে, তাই মোট ক্যাশ ইন হ্যান্ডও কমবে। ধার নিলে বাড়বে। টাকা ফেরত পেলে বা দিলে একই অ্যাকাউন্টে একই নিয়মে সমন্বয় হবে।',
     newVersion:'নতুন ভার্সন এসেছে', reload:'এখনই আপডেট করুন',
     totalIncome:'মোট আয়', totalExpense:'মোট খরচ', creditCards:'ক্রেডিট কার্ড', limitLbl:'লিমিট', usedLbl:'ব্যবহৃত', payBill:'বিল পরিশোধ', useIt:'ব্যবহার করুন',
-    calcTitle:'ক্যালকুলেটর', cardsTotal:'সব কার্ড', noCards:'এখনো কোনো ক্রেডিট কার্ড নেই। Settings থেকে যোগ করুন।',
-    bankAccounts:'ব্যাংক অ্যাকাউন্টসমূহ', allBanks:'মোট ব্যাংক ব্যালেন্স', noBanks:'এখনো কোনো ব্যাংক অ্যাকাউন্ট যুক্ত করা হয়নি।',
-    mfsAccounts:'MFS অ্যাকাউন্টসমূহ', allMfs:'মোট MFS ব্যালেন্স', noMfs:'এখনো কোনো MFS যুক্ত করা হয়নি।',
-    savingsTitle:'সেভিংস (DPS / FDR)', allSavings:'মোট সেভিংস', noSavings:'এখনো কোনো DPS বা FDR যোগ করা হয়নি।',
-    dps:'DPS', fdr:'FDR', savingsType:'সেভিংসের ধরন', developedBy:'Developed By Amzad H. Murad',
-    selectAccount:'অ্যাকাউন্ট নির্বাচন করুন', customName:'কাস্টম নাম (ঐচ্ছিক)', selectBank:'ব্যাংক নির্বাচন করুন', selectCard:'কার্ড নির্বাচন করুন', selectMfs:'MFS নির্বাচন করুন'
+    calcTitle:'ক্যালকুলেটর', cardsTotal:'সব কার্ড', noCards:'এখনো কোনো ক্রেডিট কার্ড নেই। Settings থেকে যোগ করুন।'
   }
 };
 const t = k => ((T[S.settings.lang] || T.en)[k]) || T.en[k] || k;
@@ -354,55 +313,46 @@ function defaultCats() {
   return e.map(c => ({id:c[0], name:c[1], bn:c[2], icon:c[3], color:c[4], type:'expense'}))
     .concat(i.map(c => ({id:c[0], name:c[1], bn:c[2], icon:c[3], color:c[4], type:'income'})));
 }
-
 function newProfileData() {
-  return { 
-    v2:true, 
-    accounts: [
-      {id:'cash', name:'Cash', kind:'cash', open:0, limit:0},
-      {id:'bank_dbbl', name:'Dutch-Bangla Bank (DBBL)', kind:'bank', open:0, limit:0},
-      {id:'mfs_bkash', name:'bKash', kind:'mfs', open:0, limit:0},
-      {id:'card_city', name:'City Bank Amex Card', kind:'card', open:0, limit:0}
-    ], 
-    categories: defaultCats(), 
-    tx: [] 
-  };
+  return { v2:true, accounts: [{id:'bank', name:'Bank', kind:'bank', open:0, limit:0}, {id:'cash', name:'Cash', kind:'cash', open:0, limit:0}, {id:'card', name:'Credit Card', kind:'card', open:0, limit:0}], categories: defaultCats(), tx: [] };
 }
-
 function fresh() {
   const pid = uid();
-  return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'bn', cur:'৳', firstUse:Date.now(), backupDays:7} };
+  return { v:1, profiles:[{id:pid, name:'Personal'}], cur:pid, data:{[pid]:newProfileData()}, settings:{theme:'auto', lang:'en', cur:'৳', firstUse:Date.now(), backupDays:7} };
 }
-
-const KIND_ORD = {cash:0, bank:1, mfs:2, card:3, savings:4};
-const kindOfAcc = a => a.kind || (a.id === 'card' ? 'card' : a.id === 'cash' ? 'cash' : (a.id && a.id.startsWith('mfs')) ? 'mfs' : (a.id && a.id.startsWith('sav')) ? 'savings' : 'bank');
-function sortAccounts(d) { d.accounts.sort((a, b) => (KIND_ORD[kindOfAcc(a)] ?? 9) - (KIND_ORD[kindOfAcc(b)] ?? 9)); }
-
+const STD = ['bank', 'cash', 'card'];
+const STD_NAME = {bank:'Bank', cash:'Cash', card:'Credit Card'};
+const KIND_ORD = {bank:0, cash:1, card:2};
+const kindOfAcc = a => a.kind || (a.id === 'card' ? 'card' : a.id === 'cash' ? 'cash' : 'bank');
+function sortAccounts(d) { d.accounts.sort((a, b) => KIND_ORD[kindOfAcc(a)] - KIND_ORD[kindOfAcc(b)]); }
+// Bring any stored profile up to the current shape: account kinds, opening balance, card limit, one cash account.
 function migrate(s) {
   Object.keys(s.data).forEach(pid => {
     const d = s.data[pid];
     d.accounts = d.accounts || [];
     d.tx = d.tx || [];
+    if (!d.v2) { // first time on the multi-account version: add the starter accounts, drop unused old extras
+      STD.forEach(id => { if (!d.accounts.find(a => a.id === id)) d.accounts.push({id, name:STD_NAME[id], open:0}); });
+      d.accounts = d.accounts.filter(a => STD.includes(a.id) || d.tx.some(x => x.acc === a.id || x.from === a.id || x.to === a.id));
+      d.v2 = true;
+    }
     d.accounts.forEach(a => {
       if (typeof a.open !== 'number') a.open = 0;
       if (typeof a.limit !== 'number') a.limit = 0;
       a.kind = kindOfAcc(a);
-      if (a.kind === 'savings' && !a.subtype) a.subtype = 'DPS';
     });
-    if (!d.accounts.some(a => a.kind === 'cash')) d.accounts.unshift({id:'cash', name:'Cash', kind:'cash', open:0, limit:0});
+    if (!d.accounts.some(a => a.kind === 'cash')) d.accounts.push({id:'cash', name:'Cash', kind:'cash', open:0, limit:0});
     sortAccounts(d);
   });
-  s.settings = s.settings || {theme:'auto', lang:'bn', cur:'৳'};
+  s.settings = s.settings || {theme:'auto', lang:'en', cur:'৳'};
   if (!s.settings.firstUse) s.settings.firstUse = Date.now();
   if (s.settings.backupDays === undefined) s.settings.backupDays = 7;
   return s;
 }
-
 function load() {
   try { const r = localStorage.getItem(KEY); if (r) { const s = JSON.parse(r); if (s && s.profiles && s.data) return migrate(s); } } catch (e) {}
   return fresh();
 }
-
 let S = load();
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Storage error'); } }
 const P = () => S.data[S.cur];
@@ -411,11 +361,11 @@ const cat = id => P().categories.find(c => c.id === id) || {id, name:t('uncatego
 const catName = c => (S.settings.lang === 'bn' && c.bn) ? c.bn : c.name;
 const accOf = id => P().accounts.find(a => a.id === id);
 const accKind = id => { const a = accOf(id); return a ? kindOfAcc(a) : 'bank'; };
-const accName = id => { const a = accOf(id); return !a ? '—' : (a.id === 'cash' ? t('cash') : a.name); };
-const accIcon = id => ({bank:'🏦', cash:'💵', card:'💳', mfs:'📱', savings:'📈'})[accKind(id)] || '🏦';
-const accColor = id => ({bank:'#2e86c1', cash:'#1f9d6b', card:'#c864d8', mfs:'#ef6c4d', savings:'#3aa6a0'})[accKind(id)] || '#2e86c1';
-
-// personal loans
+// the starter accounts show in the chosen language until the user renames them
+const accName = id => { const a = accOf(id); return !a ? '—' : (STD.includes(a.id) && a.name === STD_NAME[a.id]) ? t(a.id) : a.name; };
+const accIcon = id => ({bank:'🏦', cash:'💵', card:'💳'})[accKind(id)];
+const accColor = id => ({bank:'#2e86c1', cash:'#1f9d6b', card:'#c864d8'})[accKind(id)];
+// personal loans: effect on the chosen account, and on what the person owes me (+ = they owe me)
 const LOAN_ACC = {lend:-1, borrow:1, receive:1, repay:-1};
 const LOAN_LED = {lend:1, borrow:-1, receive:-1, repay:1};
 const pkey = n => String(n || '').trim().toLowerCase();
@@ -425,7 +375,7 @@ function loanPeople() {
     if (x.type !== 'loan') return;
     const k = pkey(x.person), o = m[k] || (m[k] = {key:k, name:String(x.person || '').trim(), bal:0, last:'', items:[]});
     o.bal += LOAN_LED[x.ltype] * x.amount; o.items.push(x);
-    if (x.date >= o.last) o.last = x.date;
+    if (x.date >= o.last) o.last = x.date;   // the name keeps the spelling it was first entered with
   });
   const list = Object.values(m);
   list.forEach(o => o.bal = Math.round(o.bal * 100) / 100);
@@ -450,7 +400,7 @@ const money = n => S.settings.cur + ' ' + Number(n).toLocaleString(loc(), {maxim
 
 /* ---------- ui state ---------- */
 const U = { tab:'home', mode:'month', ref:new Date(), from:ymd(new Date()), to:ymd(new Date()), q:'', rtype:'expense', searching:false };
-let F = null;
+let F = null; // transaction form state
 
 function range() {
   const r = U.ref;
@@ -488,6 +438,7 @@ function txs() {
     return (x.note || '').toLowerCase().includes(q) || cn.toLowerCase().includes(q) || an.toLowerCase().includes(q) || String(x.amount).includes(q);
   }).sort((m, n) => n.date.localeCompare(m.date) || (n.ts || 0) - (m.ts || 0));
 }
+// transfers move money between accounts; they are neither income nor expense
 function sums(list) {
   let i = 0, e = 0;
   list.forEach(x => { if (x.type === 'income') i += x.amount; else if (x.type === 'expense') e += x.amount; });
@@ -504,6 +455,7 @@ function periodBar() {
   let h = '<div class="seg">' + ['day','month','year','custom'].map(m => `<button class="${U.mode === m ? 'on' : ''}" data-act="mode" data-v="${m}">${t(m)}</button>`).join('') + '</div>';
   if (U.mode === 'custom') h += `<div class="custom"><label>${t('from')}<input type="date" id="cf" value="${U.from}"></label><label>${t('to')}<input type="date" id="ct" value="${U.to}"></label></div>`;
   else {
+    // tap the date to open the calendar (day) or month picker (month); the arrows still step one period
     const r = U.ref;
     const mid = U.mode === 'day' ? `<label class="dpick">📅 ${esc(label())}<input type="date" id="dp" value="${ymd(r)}"></label>`
       : U.mode === 'month' ? `<label class="dpick">📅 ${esc(label())}<input type="month" id="mp" value="${r.getFullYear()}-${pad(r.getMonth() + 1)}"></label>`
@@ -512,6 +464,7 @@ function periodBar() {
   }
   return h;
 }
+// compact period summary for the monthly / custom view (total income, total expense, balance - each shown once)
 function totBox(s) {
   return `<div class="tot"><div class="r2"><span>${t('totalIncome')} = <b class="inc">${money(s.i)}</b></span><span>${t('totalExpense')} = <b class="exp">${money(s.e)}</b></span></div>
     <div class="r1">${t('balance')} = <b style="color:${s.b < 0 ? 'var(--exp)' : 'inherit'}">${money(s.b)}</b></div></div>`;
@@ -537,6 +490,8 @@ function rowHtml(x) {
       <div class="mid"><b>${esc(catName(c))}</b><small>${esc(x.note || '')}${x.note ? ' · ' : ''}${accIcon(x.acc)} ${esc(accName(x.acc))}</small></div>
       <div class="amt ${x.type}">${x.type === 'income' ? '+' : '−'}${money(x.amount)}</div></div>`;
 }
+// monthly / daily view: one card per day, laid out like the original app.
+// Income on the left, expense on the right, each with its own total, then that day's balance (shown once).
 const crHtml = x => { const c = cat(x.cat); return `<div class="cr" data-act="edit" data-id="${x.id}"><span class="cn"><span class="cname">${esc(c.icon)} ${esc(catName(c))}</span><small>${accIcon(x.acc)} ${esc(x.note || accName(x.acc))}</small></span><span class="ca">${fmt2(x.amount)}</span></div>`; };
 function dayCard(date, items) {
   const s = sums(items), part = f => items.filter(f);
@@ -553,6 +508,7 @@ function listHtml(list) {
   list.forEach(x => { if (!by[x.date]) { by[x.date] = {date:x.date, items:[]}; days.push(by[x.date]); } by[x.date].items.push(x); });
   return days.map(d => dayCard(d.date, d.items)).join('');
 }
+// yearly view: one row per month (income, expense, balance) and the year's totals, like the original app
 function yearHtml() {
   const y = U.ref.getFullYear(), m = Array.from({length:12}, () => ({i:0, e:0}));
   P().tx.forEach(x => { if (x.date.slice(0, 4) === String(y)) { const k = +x.date.slice(5, 7) - 1; if (x.type === 'income') m[k].i += x.amount; else if (x.type === 'expense') m[k].e += x.amount; } });
@@ -568,8 +524,7 @@ function loanBox() {
   const tot = loanTotals();
   return `<div class="acc" data-act="tab" data-v="loans" style="cursor:pointer"><small>🤝 ${t('loanTab')}</small><b style="color:var(--inc)">${t('toReceive')}: ${money(tot.recv)}</b><small style="color:var(--exp)">${t('toPay')}: ${money(tot.pay)}</small></div>`;
 }
-
-// 1. Credit Cards Aggregation & Pop-up
+// all credit cards together: total balance (minus = used), total limit, total still available
 function cardTotals() {
   const b = balances(), cards = P().accounts.filter(a => a.kind === 'card');
   let bal = 0, limit = 0, avail = 0;
@@ -581,6 +536,7 @@ function cardsBox() {
   if (!c.cards.length) return '';
   return `<div class="acc" data-act="cards" style="cursor:pointer"><small>💳 ${t('creditCards')}${c.cards.length > 1 ? ' (' + c.cards.length + ')' : ''} ›</small><b style="color:${c.bal < 0 ? 'var(--exp)' : 'inherit'}">${money(c.bal)}</b>${c.limit > 0 ? `<small>${t('limitLbl')}: ${money(c.limit)}</small><small>${t('available')}: ${money(c.avail)}</small>` : ''}</div>`;
 }
+// tap the credit card box on Home: every card on its own, with a Pay bill shortcut
 function cardsSheet() {
   const c = cardTotals();
   const row = a => {
@@ -594,78 +550,12 @@ function cardsSheet() {
     ${c.cards.length ? `<div class="sec" style="margin-top:6px"><h3>${t('cardsTotal')}</h3><div class="kv" style="display:flex;justify-content:space-between"><span>${t('usedLbl')}</span><b style="color:var(--exp)">${money(Math.max(0, -c.bal))}</b></div>${c.limit > 0 ? `<div class="kv" style="display:flex;justify-content:space-between"><span>${t('limitLbl')}</span><b>${money(c.limit)}</b></div><div class="kv" style="display:flex;justify-content:space-between"><span>${t('available')}</span><b>${money(c.avail)}</b></div>` : ''}</div>` : ''}
     ${c.cards.map(row).join('') || `<p class="hint">${t('noCards')}</p>`}`);
 }
-
-// 2. Bank Accounts Aggregation & Pop-up
-function bankTotals() {
-  const b = balances(), banks = P().accounts.filter(a => a.kind === 'bank');
-  const bal = banks.reduce((s, a) => s + (b[a.id] || 0), 0);
-  return {banks, bal, b};
-}
-function banksBox() {
-  const bt = bankTotals();
-  if (!bt.banks.length) return '';
-  return `<div class="acc" data-act="banksheet" style="cursor:pointer"><small>🏦 ${t('bank')}${bt.banks.length > 1 ? ' (' + bt.banks.length + ')' : ''} ›</small><b>${money(bt.bal)}</b><small style="color:var(--mut)">${bt.banks.length} ${t('accounts').toLowerCase()}</small></div>`;
-}
-function banksSheet() {
-  const bt = bankTotals();
-  const row = a => `<div class="cardrow"><div class="kv"><b>🏦 ${esc(accName(a.id))}</b><b>${money(bt.b[a.id] || 0)}</b></div></div>`;
-  sheet(`<h3>${t('bankAccounts')}</h3>
-    <div class="sec" style="margin-top:6px"><h3>${t('allBanks')}</h3><div class="kv" style="display:flex;justify-content:space-between"><span>${t('total')}</span><b style="color:var(--pri)">${money(bt.bal)}</b></div></div>
-    ${bt.banks.map(row).join('') || `<p class="hint">${t('noBanks')}</p>`}`);
-}
-
-// 3. MFS Accounts Aggregation & Pop-up
-function mfsTotals() {
-  const b = balances(), mfsList = P().accounts.filter(a => a.kind === 'mfs');
-  const bal = mfsList.reduce((s, a) => s + (b[a.id] || 0), 0);
-  return {mfsList, bal, b};
-}
-function mfsBox() {
-  const mt = mfsTotals();
-  if (!mt.mfsList.length) return '';
-  return `<div class="acc" data-act="mfssheet" style="cursor:pointer"><small>📱 ${t('mfs')}${mt.mfsList.length > 1 ? ' (' + mt.mfsList.length + ')' : ''} ›</small><b>${money(mt.bal)}</b><small style="color:var(--mut)">${mt.mfsList.length} ${t('accounts').toLowerCase()}</small></div>`;
-}
-function mfsSheetModal() {
-  const mt = mfsTotals();
-  const row = a => `<div class="cardrow"><div class="kv"><b>📱 ${esc(accName(a.id))}</b><b>${money(mt.b[a.id] || 0)}</b></div></div>`;
-  sheet(`<h3>${t('mfsAccounts')}</h3>
-    <div class="sec" style="margin-top:6px"><h3>${t('allMfs')}</h3><div class="kv" style="display:flex;justify-content:space-between"><span>${t('total')}</span><b style="color:var(--pri)">${money(mt.bal)}</b></div></div>
-    ${mt.mfsList.map(row).join('') || `<p class="hint">${t('noMfs')}</p>`}`);
-}
-
-// 4. Savings (DPS / FDR) Aggregation & Pop-up
-function savingsTotals() {
-  const b = balances(), list = P().accounts.filter(a => a.kind === 'savings');
-  const bal = list.reduce((s, a) => s + (b[a.id] || 0), 0);
-  return {list, bal, b};
-}
-function savingsBox() {
-  const st = savingsTotals();
-  if (!st.list.length) return '';
-  return `<div class="acc" data-act="savingssheet" style="cursor:pointer"><small>📈 ${t('savingsTitle')} ›</small><b style="color:var(--pri)">${money(st.bal)}</b><small style="color:var(--mut)">${st.list.length} DPS/FDR</small></div>`;
-}
-function savingsSheetModal() {
-  const st = savingsTotals();
-  const row = a => `<div class="cardrow"><div class="kv"><b>📈 ${esc(accName(a.id))} <span style="font-size:11px;color:var(--mut)">(${a.subtype || 'DPS'})</span></b><b>${money(st.b[a.id] || 0)}</b></div></div>`;
-  sheet(`<h3>${t('savingsTitle')}</h3>
-    <div class="sec" style="margin-top:6px"><h3>${t('allSavings')}</h3><div class="kv" style="display:flex;justify-content:space-between"><span>${t('total')}</span><b style="color:var(--pri)">${money(st.bal)}</b></div></div>
-    ${st.list.map(row).join('') || `<p class="hint">${t('noSavings')}</p>`}`);
-}
-
 function accountsHtml() {
   const b = balances(), accs = P().accounts;
-  // Total cash in hand = Cash + Bank + MFS
-  const total = accs.filter(a => a.kind === 'cash' || a.kind === 'bank' || a.kind === 'mfs').reduce((s, a) => s + (b[a.id] || 0), 0);
-  const cashAcc = accs.find(a => a.kind === 'cash');
+  // cash in hand = banks + cash only; credit cards are loans and are not counted
+  const total = accs.filter(a => a.kind !== 'card').reduce((s, a) => s + (b[a.id] || 0), 0);
   return `<div class="cih"><small>${t('cashInHand')}</small><b>${money(total)}</b></div>
-  <div class="accs">
-    ${cashAcc ? `<div class="acc"><small>💵 ${t('cash')}</small><b>${money(b[cashAcc.id] || 0)}</b></div>` : ''}
-    ${banksBox()}
-    ${mfsBox()}
-    ${cardsBox()}
-    ${savingsBox()}
-    ${loanBox()}
-  </div>`;
+  <div class="accs">${accs.filter(a => a.kind !== 'card').map(a => `<div class="acc"><small>${accIcon(a.id)} ${esc(accName(a.id))}</small><b>${money(b[a.id] || 0)}</b></div>`).join('')}${cardsBox()}${loanBox()}</div>`;
 }
 function backupDue() {
   const st = S.settings, days = st.backupDays;
@@ -685,7 +575,7 @@ function renderList() {
   $('#accs').innerHTML = accountsHtml();
   if (U.mode === 'year') { $('#list').innerHTML = yearHtml(); return; }
   const list = txs();
-  if ($('#sum')) $('#sum').innerHTML = totBox(sums(list));
+  if ($('#sum')) $('#sum').innerHTML = totBox(sums(list));   // the daily view has no top summary: its day card already shows the totals
   $('#list').innerHTML = listHtml(list);
 }
 function homeView() {
@@ -721,7 +611,6 @@ function reportsView() {
   <div class="leg">${items.map(i => `<div class="li"><span class="dot" style="background:${i.color}22;color:${i.color}">${esc(i.icon)}</span><span class="n"><b>${esc(i.name)}</b></span><span>${money(i.v)}</span><span class="pct">${(i.v / total * 100).toFixed(1)}%</span></div>`).join('')}</div></div>
   <div class="sec"><button class="lnk" data-act="exportpdf">📄 ${t('exportPdf')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button></div>`;
 }
-
 function settingsView() {
   const p = P();
   const standalone = window.navigator.standalone || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
@@ -740,12 +629,7 @@ function settingsView() {
       const del = k === 'cash' ? '' : `<button class="lnk" style="color:var(--exp)" data-act="accdel" data-id="${a.id}">🗑 ${t('delete')}</button>`;
       return `<div class="subacc">${name}${money1}${del}</div>`;
     }).join('')}
-    <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      <button class="lnk" data-act="modalAddAcc" data-v="bank">＋ ${t('addBank')}</button>
-      <button class="lnk" data-act="modalAddAcc" data-v="card">＋ ${t('addCard')}</button>
-      <button class="lnk" data-act="modalAddAcc" data-v="mfs">＋ ${t('addMfs')}</button>
-      <button class="lnk" data-act="modalAddAcc" data-v="savings">＋ ${t('addSavings')}</button>
-    </div>
+    <button class="lnk" data-act="accadd" data-v="bank">＋ ${t('addBank')}</button><button class="lnk" data-act="accadd" data-v="card">＋ ${t('addCard')}</button>
     <p class="hint">${t('openHint')}</p></div>
   <div class="sec"><h3>${t('language')}</h3><div class="seg"><button class="${S.settings.lang === 'en' ? 'on' : ''}" data-act="lang" data-v="en">English</button><button class="${S.settings.lang === 'bn' ? 'on' : ''}" data-act="lang" data-v="bn">বাংলা</button></div>
     <h3 style="margin-top:10px">${t('theme')}</h3><div class="seg">${['auto','light','dark'].map(x => `<button class="${S.settings.theme === x ? 'on' : ''}" data-act="theme" data-v="${x}">${t(x)}</button>`).join('')}</div>
@@ -757,12 +641,8 @@ function settingsView() {
     <p class="hint">${t('icloudHint')}</p>
     <button class="lnk" data-act="importcsv">📥 ${t('importCsv')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button>
     <button class="lnk" style="color:var(--exp)" data-act="clearall">⚠️ ${t('clearAll')}</button>
-    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}
-    <div class="dev-by">${t('developedBy')}</div>
-    <p class="hint" style="text-align:center;margin-top:4px">${t('version')} ${VERSION}</p>
-  </div>`;
+    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}<p class="hint" style="text-align:center;margin-top:14px">${t('version')} ${VERSION}</p></div>`;
 }
-
 function loansView() {
   const ps = loanPeople(), tot = loanTotals(ps);
   const open = ps.filter(p => p.bal !== 0), done = ps.filter(p => p.bal === 0);
@@ -777,7 +657,6 @@ function loansView() {
   ${ps.length ? '' : `<div class="empty">${t('noLoans')}</div>`}
   <p class="hint">${t('loanHint')}</p>`;
 }
-
 function personSheet(key) {
   const p = loanPeople().find(o => o.key === key);
   if (!p) { closeSheet(); return; }
@@ -787,7 +666,6 @@ function personSheet(key) {
     <div class="btns" style="margin:0 0 10px">${p.bal ? `<button class="primary" data-act="psettle" data-k="${esc(p.key)}">${p.bal > 0 ? t('receiveMoney') : t('payBack')}</button>` : ''}<button data-act="pnewloan" data-k="${esc(p.key)}">＋ ${t('addEntry')}</button></div>
     ${items.map(rowHtml).join('')}`);
 }
-
 function render() {
   applyTheme();
   const v = U.tab === 'home' ? homeView() : U.tab === 'reports' ? reportsView() : U.tab === 'loans' ? loansView() : settingsView();
@@ -812,49 +690,16 @@ function txForm(id, preset) {
   const ex = id ? P().tx.find(x => x.id === id) : null;
   const ids = P().accounts.map(a => a.id), pick = (id, d) => ids.includes(id) ? id : d;
   const last = pick(S.settings.lastAcc, 'cash');
-  const dflt = {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:last, from:pick('bank_dbbl', ids[0]), to:pick('cash', ids[1] || ids[0]), note:'', person:'', ltype:'lend'};
+  const dflt = {type:'expense', amount:'', date:ymd(new Date()), cat:null, acc:last, from:pick('bank', ids[0]), to:pick('cash', ids[1] || ids[0]), note:'', person:'', ltype:'lend'};
   F = ex ? {...dflt, ...ex, amount:String(ex.amount)} : {...dflt, ...(preset || {})};
   F.editing = !!ex; F.origin = U.tab; renderForm();
 }
-
 function grab() {
   if (!$('#f_amt')) return;
   F.amount = $('#f_amt').value; F.date = $('#f_date').value || F.date; F.note = $('#f_note').value;
   if (F.type === 'transfer') { F.from = $('#f_from').value; F.to = $('#f_to').value; }
   if (F.type === 'loan' && $('#f_person')) F.person = $('#f_person').value;
 }
-
-function getSelectedAccKind(accId) {
-  return accKind(accId);
-}
-
-function renderAccSelector(labelKey) {
-  const selAcc = accOf(F.acc) || P().accounts[0];
-  const curKind = kindOfAcc(selAcc);
-  const kinds = [
-    {kind:'cash', label:t('cash'), icon:'💵'},
-    {kind:'bank', label:t('bank'), icon:'🏦'},
-    {kind:'mfs', label:t('mfs'), icon:'📱'},
-    {kind:'card', label:t('card'), icon:'💳'}
-  ];
-  return `
-    <label>${t(labelKey)}</label>
-    <div class="chips four" style="margin-top:4px">
-      ${kinds.map(k => `<button type="button" class="chip ${curKind === k.kind ? 'on' : ''}" data-act="fPickKind" data-k="${k.kind}">
-        <span class="ic" style="background:${accColor(k.kind)}22;color:${accColor(k.kind)}">${k.icon}</span>
-        <span>${k.label}</span>
-      </button>`).join('')}
-    </div>
-    <div class="acc-picker-box" data-act="openAccSubModal" data-k="${curKind}">
-      <div>
-        <small style="color:var(--mut);display:block">${t(curKind)} ${t('account')}</small>
-        <b>${accIcon(selAcc.id)} ${esc(accName(selAcc.id))}</b>
-      </div>
-      <span style="font-size:18px;color:var(--mut)">▾</span>
-    </div>
-  `;
-}
-
 function renderForm() {
   const isT = F.type === 'transfer', isL = F.type === 'loan';
   const cats = P().categories.filter(c => c.type === F.type);
@@ -865,25 +710,23 @@ function renderForm() {
   const addCatPanel = `<div class="sec" style="margin-top:12px"><h3>${t('addCategory')}</h3>
        <label>${t('name')}<input id="nc_name"></label>${iconPicker('nc_icon', '🏷️')}<label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
        <div class="btns"><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatsave">${t('save')}</button></div></div>`;
-
+  const accChips = labelKey => `<label>${t(labelKey)}</label>
+       <div class="chips three">${P().accounts.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</span><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`;
   const ps = isL ? loanPeople() : [], pb = isL ? ps.find(p => p.key === pkey(F.person)) : null;
   const pHint = pb && pb.bal ? `<p class="hint">${pb.bal > 0 ? `${esc(pb.name)} ${t('owesYou')} ${money(pb.bal)}` : `${t('youOwe')} ${esc(pb.name)} ${money(-pb.bal)}`}</p>` : '';
   const loanMid = `<label>${t('person')}<input id="f_person" list="ppl" autocomplete="off" value="${esc(F.person)}"><datalist id="ppl">${ps.map(p => `<option value="${esc(p.name)}">`).join('')}</datalist></label>${pHint}
        <label>${t('loanWhat')}</label>
        <div class="chips two">${[['lend','📤'],['borrow','📥'],['receive','✅'],['repay','💸']].map(([k, e]) => `<button class="chip ${F.ltype === k ? 'on' : ''}" data-act="fltype" data-v="${k}"><span class="ic" style="background:#2e86c122">${e}</span><span>${t('lt_' + k)}</span></button>`).join('')}</div>
-       ${renderAccSelector(F.ltype === 'borrow' || F.ltype === 'receive' ? 'receivedIn' : 'paidVia')}`;
-  
+       ${accChips(F.ltype === 'borrow' || F.ltype === 'receive' ? 'receivedIn' : 'paidVia')}`;
   const mid = isT
     ? `<label>${t('fromAcc')}<select id="f_from">${accOpts(F.from)}</select></label><label>${t('toAcc')}<select id="f_to">${accOpts(F.to)}</select></label>`
     : isL ? loanMid
     : F.addingCat ? addCatPanel
     : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}${newCatChip}</div>
-       ${renderAccSelector(F.type === 'income' ? 'receivedIn' : 'paidVia')}`;
-       
+       ${accChips(F.type === 'income' ? 'receivedIn' : 'paidVia')}`;
   const keys = [['C','C','op'],['back','⌫','op'],['/','÷','op'],['*','×','op'],['7'],['8'],['9'],['-','−','op'],['4'],['5'],['6'],['+','+','op'],['1'],['2'],['3'],['=','=','op'],['0'],['.']]
     .map(([k, l, c]) => `<button type="button" class="${c || ''}" data-act="ck" data-k="${k}">${l || k}</button>`).join('') + `<button type="button" class="use" data-act="ck" data-k="ok">✓ ${t('useIt')}</button>`;
   const calcPanel = F.calcOpen ? `<div class="calc"><div class="cdisp"><div id="calc_disp">${esc(calcShow(F.calc || '') || '0')}</div><div id="calc_res">${calcRes()}</div></div><div class="ckeys">${keys}</div></div>` : '';
-  
   sheet(`<div class="seg">${typeBtn('expense', t('expense'))}${typeBtn('income', t('income'))}${typeBtn('transfer', '🔄 ' + t('transferShort'))}${typeBtn('loan', '🤝 ' + t('loanShort'))}</div>
   ${isT ? `<p class="hint" style="text-align:center;margin:0">${t('transfer')}</p>` : ''}
   <div class="amtrow"><input id="f_amt" class="big" inputmode="decimal" placeholder="0" value="${esc(F.amount)}"><button type="button" class="calcbtn ${F.calcOpen ? 'on' : ''}" data-act="calc" aria-label="${t('calcTitle')}">🧮</button></div>
@@ -895,12 +738,11 @@ function renderForm() {
   if (F.addingCat && !isL) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
   else if (!F.editing && !F.amount && !F.calcOpen) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
 }
-
+// preview of the running calculator result, shown under the expression
 function calcRes() {
   const s = F.calc || '', v = calcEval(s);
   return (/[+\-*/]/.test(s.slice(1)) && isFinite(v)) ? '= ' + fmt2(v) : '';
 }
-
 function saveTx() {
   grab();
   const amt = toNum(F.amount);
@@ -922,7 +764,7 @@ function saveTx() {
   if (F.editing) { const i = P().tx.findIndex(y => y.id === F.id); P().tx[i] = {id:F.id, ts:P().tx[i].ts, ...rec}; }
   else P().tx.push({id:uid(), ts:Date.now(), ...rec});
   save(); closeSheet();
-  ensureVisible(F.date); U.q = ''; U.searching = false;
+  ensureVisible(F.date); U.q = ''; U.searching = false;   // make sure the new entry is on screen
   U.tab = (F.type === 'loan' && F.origin === 'loans') ? 'loans' : 'home';
   render(); window.scrollTo(0, 0);
 }
@@ -976,8 +818,8 @@ function parseCSV(text) {
 }
 function parseDate(s) {
   s = toLatin(String(s).trim()); let m;
-  if ((m = s.match(/^(\d{4})[\/.](\d{1,2})[\/.](\d{1,2})/))) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
-  if ((m = s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{2,4})/))) { let y = +m[3]; if (y < 100) y += 2000; return y + '-' + pad(m[2]) + '-' + pad(m[1]); }
+  if ((m = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+  if ((m = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))) { let y = +m[3]; if (y < 100) y += 2000; return y + '-' + pad(m[2]) + '-' + pad(m[1]); }
   const d = new Date(s); return isNaN(d) ? null : ymd(d);
 }
 function rowsToTx(rows) {
@@ -990,7 +832,7 @@ function rowsToTx(rows) {
   const signed = ci.type < 0 && ci.inc < 0 && amts.some(n => n < 0) && amts.some(n => n > 0);
   body.forEach(r => {
     const date = parseDate(r[ci.date] || ''); if (!date) return;
-    if (ci.type >= 0 && /loan|transfer/i.test(r[ci.type] || '')) return;
+    if (ci.type >= 0 && /loan|transfer/i.test(r[ci.type] || '')) return;   // rows we exported ourselves that are not income/expense
     let type = 'expense', amount;
     if (ci.inc >= 0 || ci.exp >= 0) {
       const iv = ci.inc >= 0 ? toNum(r[ci.inc]) : NaN, ev = ci.exp >= 0 ? toNum(r[ci.exp]) : NaN;
@@ -1013,71 +855,11 @@ function commitImport(list) {
     let c = p.categories.find(k => k.type === x.type && (k.name.toLowerCase() === cname.toLowerCase() || (k.bn && k.bn === cname)));
     if (!c) { c = {id:uid(), name:cname, icon:'🏷️', color:pal[p.categories.length % pal.length], type:x.type}; p.categories.push(c); }
     const an = (x.acc || '').toLowerCase();
-    const kind = /card|credit|কার্ড/.test(an) ? 'card' : /mfs|bkash|nagad|rocket/.test(an) ? 'mfs' : /bank|ব্যাংক/.test(an) ? 'bank' : 'cash';
+    const kind = /card|credit|কার্ড/.test(an) ? 'card' : /bank|ব্যাংক/.test(an) ? 'bank' : 'cash';
     const acc = p.accounts.find(k => k.kind === kind) || p.accounts.find(k => k.kind === 'cash') || p.accounts[0];
     p.tx.push({id:uid(), ts:Date.now(), type:x.type, amount:x.amount, date:x.date, cat:c.id, acc:acc.id, note:x.note});
   });
   save(); render();
-}
-
-/* ---------- Modal for adding accounts from Settings ---------- */
-function showAddAccountModal(kind) {
-  let selectHtml = '';
-  let extraInputs = '';
-  if (kind === 'bank') {
-    selectHtml = `<label>${t('selectBank')}<select id="m_acc_sel">${BD_BANKS.map(b => `<option value="${b}">${b}</option>`).join('')}</select></label>`;
-  } else if (kind === 'card') {
-    selectHtml = `<label>${t('selectCard')}<select id="m_acc_sel">${BD_CARDS.map(c => `<option value="${c}">${c}</option>`).join('')}</select></label>`;
-    extraInputs = `
-      <label>${t('creditLimit')}<input type="number" id="m_card_limit" placeholder="50000" value="0"></label>
-      <label>${t('owedNow')}<input type="number" id="m_card_owed" placeholder="0" value="0"></label>
-    `;
-  } else if (kind === 'mfs') {
-    selectHtml = `<label>${t('selectMfs')}<select id="m_acc_sel">${BD_MFS.map(m => `<option value="${m}">${m}</option>`).join('')}</select></label>`;
-  } else if (kind === 'savings') {
-    selectHtml = `
-      <label>${t('savingsType')}<select id="m_sav_type">
-        <option value="DPS">DPS (Deposit Pension Scheme)</option>
-        <option value="FDR">FDR (Fixed Deposit Receipt)</option>
-      </select></label>
-      <label>${t('selectBank')}<select id="m_acc_sel">${BD_BANKS.map(b => `<option value="${b}">${b}</option>`).join('')}</select></label>
-    `;
-  }
-
-  const openBalInput = kind !== 'card' ? `<label>${t('openBal')}<input type="number" id="m_acc_open" placeholder="0" value="0"></label>` : '';
-
-  sheet(`
-    <h3>${t('addAccount')}: ${t(kind)}</h3>
-    ${selectHtml}
-    <label>${t('customName')}<input id="m_acc_custom" placeholder="${t('customName')}"></label>
-    ${openBalInput}
-    ${extraInputs}
-    <div class="btns">
-      <button data-act="closeSheet">${t('cancel')}</button>
-      <button class="primary" data-act="saveNewAccount" data-k="${kind}">${t('save')}</button>
-    </div>
-  `);
-}
-
-function selectSubAccountModal(kind) {
-  const accs = P().accounts.filter(a => kindOfAcc(a) === kind);
-  if (!accs.length) {
-    toast(t('no' + kind[0].toUpperCase() + kind.slice(1)));
-    return;
-  }
-  const listHtml = accs.map(a => `
-    <div class="row" data-act="pickSpecificAcc" data-id="${a.id}" style="cursor:pointer">
-      <div class="ic" style="background:${accColor(a.id)}22;color:${accColor(a.id)}">${accIcon(a.id)}</div>
-      <div class="mid"><b>${esc(accName(a.id))}</b></div>
-      <div class="amt">${F.acc === a.id ? '✓' : ''}</div>
-    </div>
-  `).join('');
-
-  sheet(`
-    <h3>${t('selectAccount')}</h3>
-    <div style="margin-top:10px">${listHtml}</div>
-    <div class="btns"><button data-act="backToTxForm">${t('cancel')}</button></div>
-  `);
 }
 
 /* ---------- actions ---------- */
@@ -1117,41 +899,11 @@ const A = {
     if (!confirm(t('delConfirm') + ' ' + profName())) return;
     delete S.data[S.cur]; S.profiles = S.profiles.filter(p => p.id !== S.cur); S.cur = S.profiles[0].id; save(); render();
   },
-  modalAddAcc: el => { showAddAccountModal(el.dataset.v); },
-  saveNewAccount: el => {
-    const kind = el.dataset.k;
-    const sel = $('#m_acc_sel') ? $('#m_acc_sel').value : '';
-    const cust = $('#m_acc_custom') ? $('#m_acc_custom').value.trim() : '';
-    const name = cust || sel || t(kind);
-    const openVal = $('#m_acc_open') ? toNum($('#m_acc_open').value) : 0;
-    const open = isNaN(openVal) ? 0 : openVal;
-    let limit = 0, owed = 0, subtype = '';
-    
-    if (kind === 'card') {
-      const limVal = toNum($('#m_card_limit').value);
-      const owedVal = toNum($('#m_card_owed').value);
-      limit = isNaN(limVal) ? 0 : limVal;
-      owed = isNaN(owedVal) ? 0 : owedVal;
-    } else if (kind === 'savings') {
-      subtype = $('#m_sav_type') ? $('#m_sav_type').value : 'DPS';
-    }
-
-    const newAcc = {
-      id: uid(),
-      name: name,
-      kind: kind,
-      open: kind === 'card' ? -owed : open,
-      limit: limit,
-      subtype: subtype
-    };
-
-    const d = P();
-    d.accounts.push(newAcc);
-    sortAccounts(d);
-    save();
-    closeSheet();
-    render();
-    toast(t('saved'));
+  facc: el => { grab(); F.acc = el.dataset.id; renderForm(); },
+  accadd: el => {
+    const kind = el.dataset.v, n = prompt(t('accName'));
+    if (!n || !n.trim()) return;
+    const d = P(); d.accounts.push({id:uid(), name:n.trim(), kind, open:0, limit:0}); sortAccounts(d); save(); render();
   },
   accdel: el => {
     const id = el.dataset.id, d = P();
@@ -1167,35 +919,10 @@ const A = {
   },
   gomonth: el => { U.mode = 'month'; U.ref = new Date(U.ref.getFullYear(), +el.dataset.m, 1); render(); window.scrollTo(0, 0); },
   cards: () => cardsSheet(),
-  banksheet: () => banksSheet(),
-  mfssheet: () => mfsSheetModal(),
-  savingssheet: () => savingsSheetModal(),
   paybill: el => {
     const id = el.dataset.id, used = Math.max(0, -(balances()[id] || 0)), accs = P().accounts;
     const from = (accs.find(a => a.kind === 'bank') || accs.find(a => a.kind === 'cash') || accs[0]).id;
     txForm(undefined, {type:'transfer', from, to:id, amount:used ? String(used) : ''});
-  },
-  fPickKind: el => {
-    grab();
-    const k = el.dataset.k;
-    const match = P().accounts.find(a => kindOfAcc(a) === k);
-    if (match) {
-      F.acc = match.id;
-      renderForm();
-    } else {
-      toast(t('no' + k[0].toUpperCase() + k.slice(1)));
-    }
-  },
-  openAccSubModal: el => {
-    grab();
-    selectSubAccountModal(el.dataset.k);
-  },
-  pickSpecificAcc: el => {
-    F.acc = el.dataset.id;
-    renderForm();
-  },
-  backToTxForm: () => {
-    renderForm();
   },
   calc: () => { grab(); F.calcOpen = !F.calcOpen; if (F.calcOpen) { const v = toNum(F.amount); F.calc = isFinite(v) && v > 0 ? String(v) : ''; } renderForm(); },
   ck: el => {
@@ -1225,16 +952,15 @@ const A = {
         navigator.serviceWorker.getRegistrations().then(rs => Promise.all(rs.map(r => r.unregister())))]).then(done, done);
     } catch (e) { done(); }
   },
-  backup: () => shareFile('inex-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)).then(ok => {
+  backup: () => shareFile('expenses-backup-' + ymd(new Date()) + '.json', 'application/json', JSON.stringify(S)).then(ok => {
     if (ok) { S.settings.lastBackup = Date.now(); save(); render(); toast(t('saved')); }
   }),
   restore: () => $('#fRestore').click(),
   importcsv: () => $('#fCsv').click(),
-  exportcsv: () => shareFile('inex-' + range()[0] + '_' + range()[1] + '.csv', 'text/csv', csvOf(U.tab === 'settings' ? P().tx : inRange())),
+  exportcsv: () => shareFile('expenses-' + range()[0] + '_' + range()[1] + '.csv', 'text/csv', csvOf(U.tab === 'settings' ? P().tx : inRange())),
   exportpdf: printReport,
   clearall: () => { if (confirm(t('clearConfirm'))) { const lang = S.settings.lang; S = fresh(); S.settings.lang = lang; save(); render(); } }
 };
-
 document.addEventListener('click', e => { const el = e.target.closest('[data-act]'); if (el && A[el.dataset.act]) A[el.dataset.act](el); });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') { U.q = e.target.value; renderList(); }
@@ -1250,7 +976,7 @@ document.addEventListener('change', e => {
     const v = toNum(e.target.value), n = isNaN(v) ? 0 : Math.round(v * 100) / 100;
     if (a) {
       if (ds.open) a.open = n;
-      else if (ds.owed) a.open = -n;
+      else if (ds.owed) a.open = -n;               // money owed on a card is stored as a negative balance
       else if (ds.limit) a.limit = Math.max(0, n);
       else if (String(e.target.value).trim()) a.name = String(e.target.value).trim();
       save(); toast(t('saved'));
@@ -1279,12 +1005,14 @@ document.addEventListener('change', e => {
 
 /* ---------- keep the screen current ---------- */
 let todayStr = ymd(new Date());
+// after midnight (or a long time in the background) move a view that was showing "today" to the new today
 function dayRollover() {
   const n = ymd(new Date());
   if (n === todayStr) return;
   if (ymd(U.ref) === todayStr) U.ref = new Date();
   todayStr = n; render();
 }
+// ask the server which version is published; if it differs from this one, offer a one-tap update
 function checkUpdate() {
   if (!/^https?:$/.test(location.protocol) || !window.fetch) return;
   const u = 'index.html?_=' + Date.now();
