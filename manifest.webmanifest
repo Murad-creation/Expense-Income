@@ -1,6 +1,6 @@
 {
-  "name": "Day Expenses",
-  "short_name": "Expenses",
+  "name": "iNEX",
+  "short_name": "iNEX",
   "description": "Personal income and expense tracker",
   "start_url": ".",
   "scope": ".",
