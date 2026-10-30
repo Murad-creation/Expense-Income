@@ -209,7 +209,7 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
-const VERSION = '2.5';
+const VERSION = '2.6';
 
 // icon pack for categories
 const ICONS = ['🍽️','🍔','🍕','🍜','🍚','🍗','🥗','🍎','🥦','🥛','☕','🍰','🥤','🍦','🍫','🍬',
@@ -278,6 +278,7 @@ const T = {
     newVersion:'New version available', reload:'Update now',
     totalIncome:'Total income', totalExpense:'Total expense', creditCards:'Credit cards', limitLbl:'Limit', usedLbl:'Used', payBill:'Pay bill', useIt:'Use',
     mfs:'MFS', savings:'Savings', dps:'DPS', fdr:'FDR', banksLbl:'Banks', mfsLbl:'Mobile banking', totalSavings:'Total savings', instalment:'Instalment', encash:'Encash', secBank:'Bank accounts', secMfs:'Mobile banking (MFS)', secCash:'Cash', secCard:'Credit cards', secSavings:'Savings (DPS / FDR)', add_bank:'Add bank account', add_mfs:'Add MFS account', add_card:'Add credit card', add_savings:'Add savings', provider:'MFS provider', acType:'Type', noSavings:'No savings yet. Add a DPS or FDR in Settings.', noneYet:'None yet', other:'Other', totalLbl:'Total', 
+    aboutT:'About & privacy', aboutTxt:'iNEX is a free personal income and expense tracker. All your data stays on this phone only: nothing is uploaded or shared and there is no account or ads. If you delete the app or clear browser data it is gone, so take a backup regularly. Tip: use Add to Home Screen so the data is kept safely.',
     calcTitle:'Calculator', cardsTotal:'All cards', noCards:'No credit card yet. Add one in Settings.'
   },
   bn: {
@@ -314,6 +315,7 @@ const T = {
     newVersion:'নতুন ভার্সন এসেছে', reload:'এখনই আপডেট করুন',
     totalIncome:'মোট আয়', totalExpense:'মোট খরচ', creditCards:'ক্রেডিট কার্ড', limitLbl:'লিমিট', usedLbl:'ব্যবহৃত', payBill:'বিল পরিশোধ', useIt:'ব্যবহার করুন',
     mfs:'MFS', savings:'সঞ্চয়', dps:'DPS', fdr:'FDR', banksLbl:'ব্যাংক', mfsLbl:'মোবাইল ব্যাংকিং', totalSavings:'মোট সঞ্চয়', instalment:'কিস্তি জমা', encash:'ভাঙানো / তোলা', secBank:'ব্যাংক অ্যাকাউন্ট', secMfs:'মোবাইল ব্যাংকিং (MFS)', secCash:'ক্যাশ', secCard:'ক্রেডিট কার্ড', secSavings:'সঞ্চয় (DPS / FDR)', add_bank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', add_mfs:'MFS অ্যাকাউন্ট যোগ করুন', add_card:'ক্রেডিট কার্ড যোগ করুন', add_savings:'সঞ্চয় যোগ করুন', provider:'MFS সেবা', acType:'ধরন', noSavings:'এখনো কোনো সঞ্চয় নেই। Settings থেকে DPS বা FDR যোগ করুন।', noneYet:'এখনো নেই', other:'অন্যান্য', totalLbl:'মোট', 
+    aboutT:'সম্পর্কে ও গোপনীয়তা', aboutTxt:'iNEX একটি বিনামূল্যের ব্যক্তিগত আয়-ব্যয়ের হিসাব রাখার অ্যাপ। আপনার সব ডেটা শুধু এই ফোনেই থাকে: কিছুই আপলোড বা শেয়ার হয় না, কোনো অ্যাকাউন্ট বা বিজ্ঞাপন নেই। অ্যাপ মুছলে বা ব্রাউজার ডেটা ক্লিয়ার করলে ডেটা চলে যায়, তাই নিয়মিত ব্যাকআপ নিন। পরামর্শ: Add to Home Screen করে ব্যবহার করুন, তাহলে ডেটা নিরাপদ থাকে।',
     calcTitle:'ক্যালকুলেটর', cardsTotal:'সব কার্ড', noCards:'এখনো কোনো ক্রেডিট কার্ড নেই। Settings থেকে যোগ করুন।'
   }
 };
@@ -704,7 +706,9 @@ function settingsView() {
     <p class="hint">${t('icloudHint')}</p>
     <button class="lnk" data-act="importcsv">📥 ${t('importCsv')}</button><button class="lnk" data-act="exportcsv">📊 ${t('exportCsv')}</button>
     <button class="lnk" style="color:var(--exp)" data-act="clearall">⚠️ ${t('clearAll')}</button>
-    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}<p class="hint" style="text-align:center;margin-top:14px;margin-bottom:0">Developed By Amzad H. Murad</p><p class="hint" style="text-align:center;margin-top:2px">${t('version')} ${VERSION}</p></div>`;
+    <p class="hint">${t('backupHint')}</p>${standalone ? '' : `<p class="hint">${t('installHint')}</p>`}</div>
+  <div class="sec"><h3>${t('aboutT')}</h3><p class="hint">${t('aboutTxt')}</p>
+    <p class="hint" style="text-align:center;margin-top:14px;margin-bottom:0">Developed By Amzad H. Murad</p><p class="hint" style="text-align:center;margin-top:2px">${t('version')} ${VERSION}</p></div>`;
 }
 function loansView() {
   const ps = loanPeople(), tot = loanTotals(ps);
