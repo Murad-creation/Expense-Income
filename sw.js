@@ -1,5 +1,5 @@
-const V = 'dte-v1';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+const V = 'dte-v2';
+const FILES = ['./', './index.html', './manifest.webmanifest', './inex-180.png', './inex-192.png', './inex-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
