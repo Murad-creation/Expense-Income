@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="iNEX">
 <meta name="theme-color" content="#1f7a5c">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" href="inex-180.png">
 <title>iNEX</title>
 <style>
 :root{--bg:#f4f6f5;--card:#fff;--fg:#17211d;--mut:#6b7872;--line:#e3e8e5;--pri:#1f7a5c;--priT:#fff;--inc:#1f9d6b;--exp:#d6453d;--shadow:0 2px 10px rgba(0,0,0,.06)}
@@ -211,7 +211,7 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
-const VERSION = '2.7';
+const VERSION = '2.8';
 
 // icon pack for categories
 const ICONS = ['🍽️','🍔','🍕','🍜','🍚','🍗','🥗','🍎','🥦','🥛','☕','🍰','🥤','🍦','🍫','🍬',
