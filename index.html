@@ -95,6 +95,8 @@ h3{margin:0 0 4px}
 .acc b{font-size:14px;word-break:break-word}
 .chips.three{grid-template-columns:repeat(3,1fr)}
 .chips.sub{margin-top:6px}
+.mb{position:relative;display:inline-flex;align-items:center;justify-content:center;width:1.3em;height:1.3em;border-radius:50%;color:#fff;font-size:.85em;font-weight:700;vertical-align:-.2em;overflow:hidden}
+.mb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
 .accgrp{border-top:1px solid var(--line);padding:8px 0}
 .accgrp:first-of-type{border-top:0}
 .accgrp h4{margin:0 0 6px;font-size:14px}
@@ -209,7 +211,7 @@ const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new D
 const toLatin = s => String(s).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
 const toNum = v => parseFloat(toLatin(v).replace(/,/g, '').replace(/[^0-9.\-]/g, ''));
 
-const VERSION = '2.6';
+const VERSION = '2.7';
 
 // icon pack for categories
 const ICONS = ['🍽️','🍔','🍕','🍜','🍚','🍗','🥗','🍎','🥦','🥛','☕','🍰','🥤','🍦','🍫','🍬',
@@ -279,6 +281,7 @@ const T = {
     totalIncome:'Total income', totalExpense:'Total expense', creditCards:'Credit cards', limitLbl:'Limit', usedLbl:'Used', payBill:'Pay bill', useIt:'Use',
     mfs:'MFS', savings:'Savings', dps:'DPS', fdr:'FDR', banksLbl:'Banks', mfsLbl:'Mobile banking', totalSavings:'Total savings', instalment:'Instalment', encash:'Encash', secBank:'Bank accounts', secMfs:'Mobile banking (MFS)', secCash:'Cash', secCard:'Credit cards', secSavings:'Savings (DPS / FDR)', add_bank:'Add bank account', add_mfs:'Add MFS account', add_card:'Add credit card', add_savings:'Add savings', provider:'MFS provider', acType:'Type', noSavings:'No savings yet. Add a DPS or FDR in Settings.', noneYet:'None yet', other:'Other', totalLbl:'Total', 
     aboutT:'About & privacy', aboutTxt:'iNEX is a free personal income and expense tracker. All your data stays on this phone only: nothing is uploaded or shared and there is no account or ads. If you delete the app or clear browser data it is gone, so take a backup regularly. Tip: use Add to Home Screen so the data is kept safely.',
+    editCats:'Edit categories', doneEdit:'Done', tapToEdit:'Tap a category to edit or delete it', delCatAsk:'Delete this category? Entries that use it will show as Unknown.', lastCat:'Keep at least one category',
     calcTitle:'Calculator', cardsTotal:'All cards', noCards:'No credit card yet. Add one in Settings.'
   },
   bn: {
@@ -316,6 +319,7 @@ const T = {
     totalIncome:'মোট আয়', totalExpense:'মোট খরচ', creditCards:'ক্রেডিট কার্ড', limitLbl:'লিমিট', usedLbl:'ব্যবহৃত', payBill:'বিল পরিশোধ', useIt:'ব্যবহার করুন',
     mfs:'MFS', savings:'সঞ্চয়', dps:'DPS', fdr:'FDR', banksLbl:'ব্যাংক', mfsLbl:'মোবাইল ব্যাংকিং', totalSavings:'মোট সঞ্চয়', instalment:'কিস্তি জমা', encash:'ভাঙানো / তোলা', secBank:'ব্যাংক অ্যাকাউন্ট', secMfs:'মোবাইল ব্যাংকিং (MFS)', secCash:'ক্যাশ', secCard:'ক্রেডিট কার্ড', secSavings:'সঞ্চয় (DPS / FDR)', add_bank:'ব্যাংক অ্যাকাউন্ট যোগ করুন', add_mfs:'MFS অ্যাকাউন্ট যোগ করুন', add_card:'ক্রেডিট কার্ড যোগ করুন', add_savings:'সঞ্চয় যোগ করুন', provider:'MFS সেবা', acType:'ধরন', noSavings:'এখনো কোনো সঞ্চয় নেই। Settings থেকে DPS বা FDR যোগ করুন।', noneYet:'এখনো নেই', other:'অন্যান্য', totalLbl:'মোট', 
     aboutT:'সম্পর্কে ও গোপনীয়তা', aboutTxt:'iNEX একটি বিনামূল্যের ব্যক্তিগত আয়-ব্যয়ের হিসাব রাখার অ্যাপ। আপনার সব ডেটা শুধু এই ফোনেই থাকে: কিছুই আপলোড বা শেয়ার হয় না, কোনো অ্যাকাউন্ট বা বিজ্ঞাপন নেই। অ্যাপ মুছলে বা ব্রাউজার ডেটা ক্লিয়ার করলে ডেটা চলে যায়, তাই নিয়মিত ব্যাকআপ নিন। পরামর্শ: Add to Home Screen করে ব্যবহার করুন, তাহলে ডেটা নিরাপদ থাকে।',
+    editCats:'ক্যাটাগরি এডিট', doneEdit:'শেষ', tapToEdit:'এডিট বা মুছতে ক্যাটাগরিতে ট্যাপ করুন', delCatAsk:'এই ক্যাটাগরি মুছবেন? যেসব এন্ট্রিতে এটা আছে সেগুলো "অজানা" দেখাবে।', lastCat:'অন্তত একটা ক্যাটাগরি রাখতে হবে',
     calcTitle:'ক্যালকুলেটর', cardsTotal:'সব কার্ড', noCards:'এখনো কোনো ক্রেডিট কার্ড নেই। Settings থেকে যোগ করুন।'
   }
 };
@@ -344,7 +348,7 @@ const STD_NAME = {bank:'Bank', cash:'Cash', card:'Credit Card'};
 const KIND_ORD = {bank:0, mfs:1, cash:2, card:3, savings:4};
 const MFS_LIST = ['bKash','Nagad','Rocket','Upay','SureCash','mCash','CellFin','OK Wallet','MyCash','tap','Meghna Pay','Pathao Pay','Ucash','FastCash','iPay','Other'];
 const PAYK = ['cash','bank','mfs','card'];
-const KICON = {bank:'🏦', cash:'💵', card:'💳', mfs:'📱', savings:'🐷'};
+const KICON = {bank:'🏦', cash:'💵', card:'💳', mfs:'📱', savings:'💰'};
 const KCOLOR = {bank:'#2e86c1', cash:'#1f9d6b', card:'#c864d8', mfs:'#e2136e', savings:'#d98a1f'};
 const kindOfAcc = a => a.kind || (a.id === 'card' ? 'card' : a.id === 'cash' ? 'cash' : 'bank');
 function sortAccounts(d) { d.accounts.sort((a, b) => KIND_ORD[kindOfAcc(a)] - KIND_ORD[kindOfAcc(b)]); }
@@ -387,7 +391,13 @@ const accOf = id => P().accounts.find(a => a.id === id);
 const accKind = id => { const a = accOf(id); return a ? kindOfAcc(a) : 'bank'; };
 // the starter accounts show in the chosen language until the user renames them
 const accName = id => { const a = accOf(id); return !a ? '—' : (STD.includes(a.id) && a.name === STD_NAME[a.id]) ? t(a.id) : a.name; };
-const accIcon = id => KICON[accKind(id)];
+const MFS_COL = {bkash:'#e2136e', nagad:'#f6921e', rocket:'#8c3494'};
+// MFS: coloured round badge with the first letter; if logos/<name>.png exists (bkash, nagad, rocket) it is shown on top
+function mfsBadge(a) {
+  const k = String(a.name || '').toLowerCase().replace(/[^a-z]/g, ''), col = MFS_COL[k] || '#6b7872', L = (String(a.name || '?').trim()[0] || '?').toUpperCase();
+  return `<span class="mb" style="background:${col}">${esc(L)}${MFS_COL[k] ? `<img src="logos/${k}.png" alt="" onerror="this.remove()">` : ''}</span>`;
+}
+const accIcon = id => { const a = accOf(id); return a && kindOfAcc(a) === 'mfs' ? mfsBadge(a) : KICON[accKind(id)]; };
 const accColor = id => KCOLOR[accKind(id)];
 // personal loans: effect on the chosen account, and on what the person owes me (+ = they owe me)
 const LOAN_ACC = {lend:-1, borrow:1, receive:1, repay:-1};
@@ -591,7 +601,7 @@ function grpSheet(kind) {
   const g = grpTotals(kind), isS = kind === 'savings';
   const defPay = () => { const a = P().accounts; return (a.find(x => x.kind === 'bank') || a.find(x => x.kind === 'mfs') || a.find(x => x.kind === 'cash') || a[0]).id; };
   const row = a => `<div class="cardrow"><div class="kv"><b>${accIcon(a.id)} ${esc(accName(a.id))}${isS ? ' · ' + t(a.stype || 'dps') : ''}</b><b>${money(g.b[a.id] || 0)}</b></div>
-    ${isS ? `<button class="lnk" data-act="sv" data-id="${a.id}" data-v="in">➕ ${t('instalment')}</button><button class="lnk" data-act="sv" data-id="${a.id}" data-v="out">💰 ${t('encash')}</button>` : ''}</div>`;
+    ${isS ? `<button class="lnk" data-act="sv" data-id="${a.id}" data-v="in">➕ ${t('instalment')}</button><button class="lnk" data-act="sv" data-id="${a.id}" data-v="out">📤 ${t('encash')}</button>` : ''}</div>`;
   sheet(`<h3>${isS ? t('savings') : kind === 'mfs' ? t('mfsLbl') : t('banksLbl')}</h3>
     <div class="sec" style="margin-top:6px"><div class="kv" style="display:flex;justify-content:space-between"><span>${isS ? t('totalSavings') : t('totalLbl')}</span><b>${money(g.tot)}</b></div></div>
     ${g.list.map(row).join('') || `<p class="hint">${isS ? t('noSavings') : t('noneYet')}</p>`}`);
@@ -775,6 +785,11 @@ function renderForm() {
     return l.length ? `<optgroup label="${KICON[k]} ${t(k)}">${l.map(a => `<option value="${a.id}" ${a.id === sel ? 'selected' : ''}>${esc(accName(a.id))}</option>`).join('')}</optgroup>` : ''; }).join('');
   const typeBtn = (k, label) => `<button class="${F.type === k ? 'on' : ''}" data-act="ftype" data-v="${k}">${label}</button>`;
   const newCatChip = `<button class="chip" data-act="fnewcat"><span class="ic" style="background:var(--line);color:var(--fg)">＋</span><span>${t('newCategory')}</span></button>`;
+  const editChip = `<button class="chip ${F.catMode ? 'on' : ''}" data-act="fcatmode"><span class="ic" style="background:var(--line);color:var(--fg)">${F.catMode ? '✓' : '✎'}</span><span>${F.catMode ? t('doneEdit') : t('editCats')}</span></button>`;
+  const ec = F.editCatId ? P().categories.find(c => c.id === F.editCatId) : null;
+  const editCatPanel = ec ? `<div class="sec" style="margin-top:12px"><h3>${t('editCats')}</h3>
+       <label>${t('name')}<input id="nc_name" value="${esc(catName(ec))}"></label>${iconPicker('nc_icon', ec.icon)}<label>${t('color')}<input type="color" id="nc_color" value="${esc(ec.color)}"></label>
+       <div class="btns"><button class="danger" data-act="fcatdel">${t('delete')}</button><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatupdate">${t('save')}</button></div></div>` : '';
   const addCatPanel = `<div class="sec" style="margin-top:12px"><h3>${t('addCategory')}</h3>
        <label>${t('name')}<input id="nc_name"></label>${iconPicker('nc_icon', '🏷️')}<label>${t('color')}<input type="color" id="nc_color" value="#4f8cff"></label>
        <div class="btns"><button data-act="fcatcancel">${t('cancel')}</button><button class="primary" data-act="fcatsave">${t('save')}</button></div></div>`;
@@ -784,7 +799,7 @@ function renderForm() {
     const kinds = PAYK.filter(k => accs.some(a => a.kind === k)), list = accs.filter(a => a.kind === pk);
     return `<label>${t(labelKey)}</label>
        <div class="chips">${kinds.map(k => `<button class="chip ${pk === k ? 'on' : ''}" data-act="fpk" data-v="${k}"><span class="ic" style="background:${KCOLOR[k]}22;color:${KCOLOR[k]}">${KICON[k]}</span><span>${t(k)}</span></button>`).join('')}</div>
-       ${pk === 'cash' && list.length < 2 ? '' : `<div class="chips three sub">${list.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span>${esc(accName(a.id))}</span></button>`).join('')}</div>`}`;
+       ${pk === 'cash' && list.length < 2 ? '' : `<div class="chips three sub">${list.map(a => `<button class="chip ${F.acc === a.id ? 'on' : ''}" data-act="facc" data-id="${a.id}"><span>${a.kind === 'mfs' ? accIcon(a.id) + ' ' : ''}${esc(accName(a.id))}</span></button>`).join('')}</div>`}`;
   };
   const ps = isL ? loanPeople() : [], pb = isL ? ps.find(p => p.key === pkey(F.person)) : null;
   const pHint = pb && pb.bal ? `<p class="hint">${pb.bal > 0 ? `${esc(pb.name)} ${t('owesYou')} ${money(pb.bal)}` : `${t('youOwe')} ${esc(pb.name)} ${money(-pb.bal)}`}</p>` : '';
@@ -795,8 +810,9 @@ function renderForm() {
   const mid = isT
     ? `<label>${t('fromAcc')}<select id="f_from">${accOpts(F.from)}</select></label><label>${t('toAcc')}<select id="f_to">${accOpts(F.to)}</select></label>`
     : isL ? loanMid
+    : ec ? editCatPanel
     : F.addingCat ? addCatPanel
-    : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}</span></button>`).join('')}${newCatChip}</div>
+    : `<div class="chips">${cats.map(c => `<button class="chip ${F.cat === c.id ? 'on' : ''}" data-act="fcat" data-id="${c.id}"><span class="ic" style="background:${c.color}22;color:${c.color}">${esc(c.icon)}</span><span>${esc(catName(c))}${F.catMode ? ' ✎' : ''}</span></button>`).join('')}${F.catMode ? '' : newCatChip}${editChip}</div>${F.catMode ? `<p class="hint">${t('tapToEdit')}</p>` : ''}
        ${accChips(F.type === 'income' ? 'receivedIn' : 'paidVia')}`;
   const keys = [['C','C','op'],['back','⌫','op'],['/','÷','op'],['*','×','op'],['7'],['8'],['9'],['-','−','op'],['4'],['5'],['6'],['+','+','op'],['1'],['2'],['3'],['=','=','op'],['0'],['.']]
     .map(([k, l, c]) => `<button type="button" class="${c || ''}" data-act="ck" data-k="${k}">${l || k}</button>`).join('') + `<button type="button" class="use" data-act="ck" data-k="ok">✓ ${t('useIt')}</button>`;
@@ -808,8 +824,8 @@ function renderForm() {
   ${mid}
   <label>${t('date')}<input type="date" id="f_date" value="${F.date}"></label>
   <label>${t('note')}<input id="f_note" value="${esc(F.note)}"></label>
-  ${F.addingCat ? '' : `<div class="btns fbtns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="fsave">${t('save')}</button></div>`}`);
-  if (F.addingCat && !isL) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
+  ${F.addingCat || ec ? '' : `<div class="btns fbtns">${F.editing ? `<button class="danger" data-act="fdel">${t('delete')}</button>` : ''}<button data-act="closeSheet">${t('cancel')}</button><button class="primary" data-act="fsave">${t('save')}</button></div>`}`);
+  if ((F.addingCat || ec) && !isL) setTimeout(() => { const a = $('#nc_name'); if (a) a.focus(); }, 60);
   else if (!F.editing && !F.amount && !F.calcOpen) setTimeout(() => { const a = $('#f_amt'); if (a) a.focus(); }, 60);
 }
 // preview of the running calculator result, shown under the expression
@@ -948,9 +964,27 @@ const A = {
   pnewloan: el => { const p = loanPeople().find(o => o.key === el.dataset.k); if (p) txForm(undefined, {type:'loan', person:p.name, ltype:'lend'}); },
   fltype: el => { grab(); F.ltype = el.dataset.v; renderForm(); },
   closeSheet: closeSheet,
-  ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; F.addingCat = false; renderForm(); },
+  ftype: el => { grab(); F.type = el.dataset.v; F.cat = null; F.addingCat = false; F.catMode = false; F.editCatId = null; renderForm(); },
   fnewcat: () => { grab(); F.addingCat = true; renderForm(); },
-  fcatcancel: () => { grab(); F.addingCat = false; renderForm(); },
+  fcatcancel: () => { grab(); F.addingCat = false; F.editCatId = null; renderForm(); },
+  fcatmode: () => { grab(); F.catMode = !F.catMode; F.editCatId = null; renderForm(); },
+  fcatupdate: () => {
+    const c = P().categories.find(k => k.id === F.editCatId), n = $('#nc_name').value.trim();
+    if (!c) return;
+    if (!n) { toast(t('name')); return; }
+    grab();
+    if (n !== catName(c)) { c.name = n; delete c.bn; }
+    c.icon = $('#nc_icon').value.trim() || c.icon; c.color = $('#nc_color').value || c.color;
+    save(); F.editCatId = null; renderForm(); toast(t('saved'));
+  },
+  fcatdel: () => {
+    const c = P().categories.find(k => k.id === F.editCatId); if (!c) return;
+    if (P().categories.filter(k => k.type === c.type).length < 2) { toast(t('lastCat')); return; }
+    if (!confirm(t('delCatAsk'))) return;
+    grab(); P().categories = P().categories.filter(k => k.id !== c.id);
+    if (F.cat === c.id) F.cat = null;
+    save(); F.editCatId = null; renderForm();
+  },
   fcatsave: () => {
     const n = $('#nc_name').value.trim();
     if (!n) { toast(t('name')); return; }
@@ -959,7 +993,7 @@ const A = {
     P().categories.push(c); save();
     F.cat = c.id; F.addingCat = false; renderForm();
   },
-  fcat: el => { grab(); F.cat = el.dataset.id; renderForm(); },
+  fcat: el => { grab(); if (F.catMode) { F.editCatId = el.dataset.id; } else F.cat = el.dataset.id; renderForm(); },
   fsave: saveTx,
   fdel: () => { if (confirm(t('delConfirm'))) { P().tx = P().tx.filter(x => x.id !== F.id); save(); closeSheet(); render(); } },
   search: () => { U.searching = !U.searching; if (!U.searching) U.q = ''; render(); if (U.searching) { const q = $('#q'); if (q) q.focus(); } },
